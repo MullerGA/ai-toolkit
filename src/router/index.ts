@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import DataProcessing from '@/views/DataProcessing.vue'
 import Prompting from '@/views/Prompting.vue'
 import PromptTemplates from '@/views/PromptTemplates.vue'
+import Introduction from '@/views/Introduction.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -11,6 +12,11 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: Home
+    },
+    {
+      path: '/introduction',
+      name: 'introduction',
+      component: Introduction
     },
     {
       path: '/local-generation',
