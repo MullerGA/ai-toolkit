@@ -63,7 +63,7 @@
             <div class="bg-muted/50 rounded-lg p-4">
               <div class="space-y-2">
                 <div v-for="vector in vectors" :key="vector.token" 
-                     class="flex items-center justify-between p-2 bg-green-100 dark:bg-green-900 rounded-md hover:shadow-md transition-shadow">
+                     class="flex items-center justify-between p-2 bg-blue-100 dark:bg-blue-900/20 rounded-md hover:shadow-md transition-shadow">
                   <span class="font-medium">{{ vector.token }}</span>
                   <span class="font-mono text-sm text-muted-foreground">
                     [{{ vector.values.map(v => v.toFixed(2)).join(', ') }}]
@@ -84,7 +84,7 @@
                     :cx="node.x"
                     :cy="node.y"
                     r="40"
-                    class="fill-muted-foreground/20 hover:fill-muted-foreground/30 cursor-pointer"
+                    class="fill-blue-100 hover:fill-blue-200 dark:fill-blue-900/20 dark:hover:fill-blue-900/30 cursor-pointer"
                   />
                   <text
                     :x="node.x"
@@ -105,7 +105,7 @@
                     :y1="link.source.y"
                     :x2="link.target.x"
                     :y2="link.target.y"
-                    class="stroke-muted-foreground/50"
+                    class="stroke-blue-300 dark:stroke-blue-700"
                     stroke-width="2"
                   />
                   <text

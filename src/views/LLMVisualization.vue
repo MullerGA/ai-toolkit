@@ -1,454 +1,456 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <Card v-if="!isLoading" class="w-full max-w-7xl mx-auto">
-      <CardHeader class="pb-4 border-b">
-        <div class="flex justify-between items-start">
-          <div>
-            <CardTitle>L'Entonnoir de Décision LLM</CardTitle>
-            <CardDescription>
-              Visualisez comment les paramètres influencent la génération de texte
-            </CardDescription>
-          </div>
-          <Button variant="outline" @click="showInfo = true">
-            En savoir plus
-          </Button>
-        </div>
-      </CardHeader>
-
-      <!-- Grille principale -->
-      <div class="grid md:grid-cols-12 gap-8 p-6">
-        <!-- Colonne de gauche : Contrôles -->
-        <div class="md:col-span-3 space-y-8">
-          <!-- Sélection du scénario -->
-          <div class="space-y-2">
-            <h3 class="text-sm font-medium mb-2">Scénario</h3>
-            <CardContent class="border rounded-lg bg-muted/50 p-4 shadow-sm">
-              <div class="flex flex-col gap-3">
-                <Button 
-                  variant="outline" 
-                  :class="{ 'bg-primary text-primary-foreground': selectedScenario === 'horse' }"
-                  @click="selectScenario('horse')"
-                >
-                  Scénario Animal
-                </Button>
-                <Button 
-                  variant="outline"
-                  :class="{ 'bg-primary text-primary-foreground': selectedScenario === 'italy' }"
-                  @click="selectScenario('italy')"
-                >
-                  Scénario Voyage
-                </Button>
-              </div>
-            </CardContent>
-          </div>
-
-          <!-- Contrôles -->
-          <div class="space-y-2">
-            <h3 class="text-sm font-medium mb-2">Paramètres</h3>
-            <CardContent class="border rounded-lg p-6 shadow-sm">
-              <div class="space-y-8">
-                <div class="space-y-2">
-                  <Label>Température: {{ temperature.toFixed(2) }}</Label>
-                  <Slider
-                    :model-value="[temperature]"
-                    @update:model-value="value => temperature = value[0]"
-                    :min="0.1"
-                    :max="2.0"
-                    :step="0.1"
-                    class="w-full"
-                  />
-                  <p class="text-xs text-muted-foreground">
-                    Contrôle la créativité du modèle
-                  </p>
-                </div>
-
-                <div class="space-y-2">
-                  <Label>Top K: {{ topK }}</Label>
-                  <Slider
-                    :model-value="[topK]"
-                    @update:model-value="value => topK = value[0]"
-                    :min="1"
-                    :max="10"
-                    :step="1"
-                    class="w-full"
-                  />
-                  <p class="text-xs text-muted-foreground">
-                    Limite le nombre de tokens
-                  </p>
-                </div>
-
-                <div class="space-y-2">
-                  <Label>Top P: {{ topP.toFixed(2) }}</Label>
-                  <Slider
-                    :model-value="[topP]"
-                    @update:model-value="value => topP = value[0]"
-                    :min="0.1"
-                    :max="1.0"
-                    :step="0.05"
-                    class="w-full"
-                  />
-                  <p class="text-xs text-muted-foreground">
-                    Seuil de probabilité cumulée
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </div>
-
-          <!-- Distribution initiale -->
-          <div class="space-y-2">
-            <h3 class="text-sm font-medium mb-2">Données</h3>
-            <CardContent class="border rounded-lg p-4 shadow-sm">
-              <Collapsible>
-                <CollapsibleTrigger class="flex items-center gap-2 text-sm hover:text-primary w-full">
-                  <ChevronRightIcon
-                    class="h-4 w-4 transition-transform duration-200"
-                    :class="{ 'rotate-90': isOpen }"
-                  />
-                  <span>Distribution initiale</span>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <ScrollArea class="h-[200px] mt-4">
-                    <div class="space-y-2 pr-4">
-                      <div v-for="token in baseTokens" :key="token.token" 
-                           class="text-sm flex justify-between items-center px-3 py-2 hover:bg-muted/50 rounded-md">
-                        <span>{{ token.token }}</span>
-                        <span>{{ (token.prob * 100).toFixed(1) }}%</span>
-                      </div>
-                    </div>
-                  </ScrollArea>
-                </CollapsibleContent>
-              </Collapsible>
-            </CardContent>
-          </div>
-        </div>
-
-        <!-- Colonne centrale : Visualisation -->
-        <div class="md:col-span-6">
-          <!-- Phrase d'exemple -->
-          <CardContent class="pb-6">
-            <div class="bg-muted p-6 rounded-lg shadow-sm">
-              <p class="text-lg font-medium">{{ currentScenario.prompt }}<span class="text-primary font-bold"> ...</span></p>
-              <p class="text-sm text-muted-foreground mt-3">{{ currentScenario.description }}</p>
+  <div class="min-h-screen bg-[#f8f9fa] dark:bg-[#1a1a1a]">
+    <div class="container mx-auto px-4 py-8">
+      <Card v-if="!isLoading" class="w-full max-w-7xl mx-auto">
+        <CardHeader class="pb-4 border-b">
+          <div class="flex justify-between items-start">
+            <div>
+              <CardTitle>L'Entonnoir de Décision LLM</CardTitle>
+              <CardDescription>
+                Visualisez comment les paramètres influencent la génération de texte
+              </CardDescription>
             </div>
-          </CardContent>
+            <Button variant="outline" @click="showInfo = true">
+              En savoir plus
+            </Button>
+          </div>
+        </CardHeader>
 
-          <!-- Entonnoir -->
-          <CardContent>
-            <div class="h-[600px] bg-card rounded-lg border shadow-sm relative">
-              <svg viewBox="0 0 400 400" class="w-full h-full">
-                <!-- Entonnoir -->
-                <path
-                  :d="getFunnelPath"
-                  fill="#e2e8f0"
-                  stroke="#64748b"
-                  stroke-width="2"
-                />
-
-                <!-- Points représentant les tokens par niveau -->
-                <template v-for="(level, levelIndex) in tokenLevels" :key="levelIndex">
-                  <circle
-                    v-for="(point, i) in level"
-                    :key="`${levelIndex}-${i}`"
-                    :cx="point.x"
-                    :cy="point.y"
-                    r="4"
-                    :fill="point.color"
-                    class="token-point"
+        <!-- Grille principale -->
+        <div class="grid md:grid-cols-12 gap-8 p-6">
+          <!-- Colonne de gauche : Contrôles -->
+          <div class="md:col-span-3 space-y-8">
+            <!-- Sélection du scénario -->
+            <div class="space-y-2">
+              <h3 class="text-sm font-medium mb-2">Scénario</h3>
+              <CardContent class="border rounded-lg bg-muted/50 p-4 shadow-sm">
+                <div class="flex flex-col gap-3">
+                  <Button 
+                    variant="outline" 
+                    :class="{ 'bg-primary text-primary-foreground': selectedScenario === 'horse' }"
+                    @click="selectScenario('horse')"
                   >
-                    <title>{{ point.title }}</title>
-                  </circle>
-                </template>
-              </svg>
+                    Scénario Animal
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    :class="{ 'bg-primary text-primary-foreground': selectedScenario === 'italy' }"
+                    @click="selectScenario('italy')"
+                  >
+                    Scénario Voyage
+                  </Button>
+                </div>
+              </CardContent>
+            </div>
 
-              <!-- Légende -->
-              <div class="absolute top-4 right-4 bg-background/80 p-4 rounded-lg shadow-sm">
-                <div class="space-y-2">
-                  <p class="text-sm">
-                    <span class="inline-block w-3 h-3 rounded-full bg-[#93c5fd] mr-2"></span>
-                    Après température: {{ filteredTokens.afterTemp.length }}
-                  </p>
-                  <p class="text-sm">
-                    <span class="inline-block w-3 h-3 rounded-full bg-[#3b82f6] mr-2"></span>
-                    Après Top K: {{ filteredTokens.afterTopK.length }}
-                  </p>
-                  <p class="text-sm">
-                    <span class="inline-block w-3 h-3 rounded-full bg-[#1d4ed8] mr-2"></span>
-                    Après Top P: {{ filteredTokens.afterTopP.length }}
-                  </p>
+            <!-- Contrôles -->
+            <div class="space-y-2">
+              <h3 class="text-sm font-medium mb-2">Paramètres</h3>
+              <CardContent class="border rounded-lg p-6 shadow-sm">
+                <div class="space-y-8">
+                  <div class="space-y-2">
+                    <Label>Température: {{ temperature.toFixed(2) }}</Label>
+                    <Slider
+                      :model-value="[temperature]"
+                      @update:model-value="value => temperature = value[0]"
+                      :min="0.1"
+                      :max="2.0"
+                      :step="0.1"
+                      class="w-full"
+                    />
+                    <p class="text-xs text-muted-foreground">
+                      Contrôle la créativité du modèle
+                    </p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label>Top K: {{ topK }}</Label>
+                    <Slider
+                      :model-value="[topK]"
+                      @update:model-value="value => topK = value[0]"
+                      :min="1"
+                      :max="10"
+                      :step="1"
+                      class="w-full"
+                    />
+                    <p class="text-xs text-muted-foreground">
+                      Limite le nombre de tokens
+                    </p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label>Top P: {{ topP.toFixed(2) }}</Label>
+                    <Slider
+                      :model-value="[topP]"
+                      @update:model-value="value => topP = value[0]"
+                      :min="0.1"
+                      :max="1.0"
+                      :step="0.05"
+                      class="w-full"
+                    />
+                    <p class="text-xs text-muted-foreground">
+                      Seuil de probabilité cumulée
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </div>
+
+            <!-- Distribution initiale -->
+            <div class="space-y-2">
+              <h3 class="text-sm font-medium mb-2">Données</h3>
+              <CardContent class="border rounded-lg p-4 shadow-sm">
+                <Collapsible>
+                  <CollapsibleTrigger class="flex items-center gap-2 text-sm hover:text-primary w-full">
+                    <ChevronRightIcon
+                      class="h-4 w-4 transition-transform duration-200"
+                      :class="{ 'rotate-90': isOpen }"
+                    />
+                    <span>Distribution initiale</span>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <ScrollArea class="h-[200px] mt-4">
+                      <div class="space-y-2 pr-4">
+                        <div v-for="token in baseTokens" :key="token.token" 
+                             class="text-sm flex justify-between items-center px-3 py-2 hover:bg-muted/50 rounded-md">
+                          <span>{{ token.token }}</span>
+                          <span>{{ (token.prob * 100).toFixed(1) }}%</span>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                  </CollapsibleContent>
+                </Collapsible>
+              </CardContent>
+            </div>
+          </div>
+
+          <!-- Colonne centrale : Visualisation -->
+          <div class="md:col-span-6">
+            <!-- Phrase d'exemple -->
+            <CardContent class="pb-6">
+              <div class="bg-muted p-6 rounded-lg shadow-sm">
+                <p class="text-lg font-medium">{{ currentScenario.prompt }}<span class="text-primary font-bold"> ...</span></p>
+                <p class="text-sm text-muted-foreground mt-3">{{ currentScenario.description }}</p>
+              </div>
+            </CardContent>
+
+            <!-- Entonnoir -->
+            <CardContent>
+              <div class="h-[600px] bg-card rounded-lg border shadow-sm relative">
+                <svg viewBox="0 0 400 400" class="w-full h-full">
+                  <!-- Entonnoir -->
+                  <path
+                    :d="getFunnelPath"
+                    fill="#e2e8f0"
+                    stroke="#64748b"
+                    stroke-width="2"
+                  />
+
+                  <!-- Points représentant les tokens par niveau -->
+                  <template v-for="(level, levelIndex) in tokenLevels" :key="levelIndex">
+                    <circle
+                      v-for="(point, i) in level"
+                      :key="`${levelIndex}-${i}`"
+                      :cx="point.x"
+                      :cy="point.y"
+                      r="4"
+                      :fill="point.color"
+                      class="token-point"
+                    >
+                      <title>{{ point.title }}</title>
+                    </circle>
+                  </template>
+                </svg>
+
+                <!-- Légende -->
+                <div class="absolute top-4 right-4 bg-background/80 p-4 rounded-lg shadow-sm">
+                  <div class="space-y-2">
+                    <p class="text-sm">
+                      <span class="inline-block w-3 h-3 rounded-full bg-[#93c5fd] mr-2"></span>
+                      Après température: {{ filteredTokens.afterTemp.length }}
+                    </p>
+                    <p class="text-sm">
+                      <span class="inline-block w-3 h-3 rounded-full bg-[#3b82f6] mr-2"></span>
+                      Après Top K: {{ filteredTokens.afterTopK.length }}
+                    </p>
+                    <p class="text-sm">
+                      <span class="inline-block w-3 h-3 rounded-full bg-[#1d4ed8] mr-2"></span>
+                      Après Top P: {{ filteredTokens.afterTopP.length }}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </div>
-
-        <!-- Colonne de droite : Résultats -->
-        <div class="md:col-span-3">
-          <div class="space-y-2">
-            <h3 class="text-sm font-medium mb-2">Résultats</h3>
-            <CardContent class="h-full border rounded-lg p-6 shadow-sm">
-              <ScrollArea class="h-[700px]">
-                <div class="space-y-4 p-4">
-                  <!-- Résultats après température -->
-                  <div class="space-y-2">
-                    <h3 class="font-medium flex items-center gap-2">
-                      <span class="w-3 h-3 rounded-full bg-[#93c5fd]"></span>
-                      Après température ({{ temperature.toFixed(2) }})
-                    </h3>
-                    <div class="space-y-1">
-                      <div v-for="token in sortedTempTokens.slice(0, 6)" :key="token.token" 
-                           class="text-sm flex justify-between px-2 py-1 rounded hover:bg-muted">
-                        <span>{{ token.token }}</span>
-                        <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Résultats après Top K -->
-                  <div class="space-y-2">
-                    <h3 class="font-medium flex items-center gap-2">
-                      <span class="w-3 h-3 rounded-full bg-[#3b82f6]"></span>
-                      Après Top K ({{ topK }})
-                    </h3>
-                    <div class="space-y-1">
-                      <div v-for="token in sortedTopKTokens.slice(0, 6)" :key="token.token" 
-                           class="text-sm flex justify-between px-2 py-1 rounded hover:bg-muted">
-                        <span>{{ token.token }}</span>
-                        <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Résultats après Top P -->
-                  <div class="space-y-2">
-                    <h3 class="font-medium flex items-center gap-2">
-                      <span class="w-3 h-3 rounded-full bg-[#1d4ed8]"></span>
-                      Après Top P ({{ topP.toFixed(2) }})
-                    </h3>
-                    <div class="space-y-1">
-                      <div v-for="token in sortedTopPTokens.slice(0, 6)" :key="token.token" 
-                           class="text-sm flex justify-between px-2 py-1 rounded hover:bg-muted">
-                        <span>{{ token.token }}</span>
-                        <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </ScrollArea>
             </CardContent>
           </div>
+
+          <!-- Colonne de droite : Résultats -->
+          <div class="md:col-span-3">
+            <div class="space-y-2">
+              <h3 class="text-sm font-medium mb-2">Résultats</h3>
+              <CardContent class="h-full border rounded-lg p-6 shadow-sm">
+                <ScrollArea class="h-[700px]">
+                  <div class="space-y-4 p-4">
+                    <!-- Résultats après température -->
+                    <div class="space-y-2">
+                      <h3 class="font-medium flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-[#93c5fd]"></span>
+                        Après température ({{ temperature.toFixed(2) }})
+                      </h3>
+                      <div class="space-y-1">
+                        <div v-for="token in sortedTempTokens.slice(0, 6)" :key="token.token" 
+                             class="text-sm flex justify-between px-2 py-1 rounded hover:bg-muted">
+                          <span>{{ token.token }}</span>
+                          <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Résultats après Top K -->
+                    <div class="space-y-2">
+                      <h3 class="font-medium flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-[#3b82f6]"></span>
+                        Après Top K ({{ topK }})
+                      </h3>
+                      <div class="space-y-1">
+                        <div v-for="token in sortedTopKTokens.slice(0, 6)" :key="token.token" 
+                             class="text-sm flex justify-between px-2 py-1 rounded hover:bg-muted">
+                          <span>{{ token.token }}</span>
+                          <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Résultats après Top P -->
+                    <div class="space-y-2">
+                      <h3 class="font-medium flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-[#1d4ed8]"></span>
+                        Après Top P ({{ topP.toFixed(2) }})
+                      </h3>
+                      <div class="space-y-1">
+                        <div v-for="token in sortedTopPTokens.slice(0, 6)" :key="token.token" 
+                             class="text-sm flex justify-between px-2 py-1 rounded hover:bg-muted">
+                          <span>{{ token.token }}</span>
+                          <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </div>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
 
-    <Dialog v-model:open="showInfo">
- <DialogContent class="max-w-4xl max-h-[80vh] overflow-y-auto">
-   <DialogHeader>
-     <DialogTitle>L'Entonnoir de Décision LLM : Documentation Complète</DialogTitle>
-     <DialogDescription>
-       Comprendre le processus complet de génération de texte par les LLMs
-     </DialogDescription>
-   </DialogHeader>
+      <Dialog v-model:open="showInfo">
+        <DialogContent class="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>L'Entonnoir de Décision LLM : Documentation Complète</DialogTitle>
+            <DialogDescription>
+              Comprendre le processus complet de génération de texte par les LLMs
+            </DialogDescription>
+          </DialogHeader>
 
-   <div class="prose dark:prose-invert mt-4">
-     <h2>Vue d'ensemble</h2>
-     <p>
-       Un LLM (Large Language Model) fonctionne comme un système de prédiction probabiliste complexe. 
-       Pour la phrase "Il court au galop, c'est un...", le modèle passe par plusieurs étapes de 
-       traitement avant de proposer une réponse.
-     </p>
+          <div class="prose dark:prose-invert mt-4">
+            <h2>Vue d'ensemble</h2>
+            <p>
+              Un LLM (Large Language Model) fonctionne comme un système de prédiction probabiliste complexe. 
+              Pour la phrase "Il court au galop, c'est un...", le modèle passe par plusieurs étapes de 
+              traitement avant de proposer une réponse.
+            </p>
 
-     <h2>Le processus complet</h2>
+            <h2>Le processus complet</h2>
 
-     <h3>Analyse contextuelle</h3>
-     <ul>
-       <li>Tokenisation du texte d'entrée</li>
-       <li>Analyse du contexte précédent</li>
-       <li>Identification des relations sémantiques</li>
-       <li>Application de l'attention sur les éléments pertinents</li>
-     </ul>
+            <h3>Analyse contextuelle</h3>
+            <ul>
+              <li>Tokenisation du texte d'entrée</li>
+              <li>Analyse du contexte précédent</li>
+              <li>Identification des relations sémantiques</li>
+              <li>Application de l'attention sur les éléments pertinents</li>
+            </ul>
 
-     <h3>Génération des probabilités brutes</h3>
-     <ul>
-       <li>Création d'un vecteur de scores pour chaque token possible</li>
-       <li>Identification des tokens pertinents dans le contexte</li>
-       <li>Calcul des scores d'attention pour chaque token</li>
-     </ul>
+            <h3>Génération des probabilités brutes</h3>
+            <ul>
+              <li>Création d'un vecteur de scores pour chaque token possible</li>
+              <li>Identification des tokens pertinents dans le contexte</li>
+              <li>Calcul des scores d'attention pour chaque token</li>
+            </ul>
 
-     <h3>Application du Softmax</h3>
-     <ul>
-       <li>Transformation des scores bruts en probabilités</li>
-       <li>Normalisation pour que la somme = 1</li>
-       <li>Distribution initiale créée</li>
-     </ul>
+            <h3>Application du Softmax</h3>
+            <ul>
+              <li>Transformation des scores bruts en probabilités</li>
+              <li>Normalisation pour que la somme = 1</li>
+              <li>Distribution initiale créée</li>
+            </ul>
 
-     <h3>Pruning (élagage)</h3>
-     <ul>
-       <li>Élimination des tokens non pertinents</li>
-       <li>Réduction drastique de l'espace des possibles</li>
-       <li>Conservation uniquement des tokens contextuellement cohérents</li>
-     </ul>
+            <h3>Pruning (élagage)</h3>
+            <ul>
+              <li>Élimination des tokens non pertinents</li>
+              <li>Réduction drastique de l'espace des possibles</li>
+              <li>Conservation uniquement des tokens contextuellement cohérents</li>
+            </ul>
 
-     <h3>Paramètres de contrôle</h3>
-     <div class="pl-4 border-l-4 border-gray-200">
-       <h4>Temperature</h4>
-       <ul>
-         <li>Modifie la distribution des probabilités</li>
-         <li>Impact sur la "créativité" des choix</li>
-         <li>Formule : P(x) = exp(logits/T) / Σ exp(logits/T)</li>
-       </ul>
+            <h3>Paramètres de contrôle</h3>
+            <div class="pl-4 border-l-4 border-gray-200">
+              <h4>Temperature</h4>
+              <ul>
+                <li>Modifie la distribution des probabilités</li>
+                <li>Impact sur la "créativité" des choix</li>
+                <li>Formule : P(x) = exp(logits/T) / Σ exp(logits/T)</li>
+              </ul>
 
-       <h4>Top K</h4>
-       <ul>
-         <li>Sélection des K tokens les plus probables</li>
-         <li>Limite stricte sur le nombre de choix</li>
-         <li>Réduit l'espace des possibles</li>
-       </ul>
+              <h4>Top K</h4>
+              <ul>
+                <li>Sélection des K tokens les plus probables</li>
+                <li>Limite stricte sur le nombre de choix</li>
+                <li>Réduit l'espace des possibles</li>
+              </ul>
 
-       <h4>Top P (Nucleus Sampling)</h4>
-       <ul>
-         <li>Sélection basée sur la probabilité cumulée</li>
-         <li>Garde les tokens jusqu'à atteindre le seuil P</li>
-         <li>Adaptation dynamique selon le contexte</li>
-       </ul>
-     </div>
+              <h4>Top P (Nucleus Sampling)</h4>
+              <ul>
+                <li>Sélection basée sur la probabilité cumulée</li>
+                <li>Garde les tokens jusqu'à atteindre le seuil P</li>
+                <li>Adaptation dynamique selon le contexte</li>
+              </ul>
+            </div>
 
-     <h3>Sélection finale</h3>
-     <ul>
-       <li>Tirage aléatoire pondéré</li>
-       <li>Respect des probabilités ajustées</li>
-       <li>Génération de la réponse</li>
-     </ul>
+            <h3>Sélection finale</h3>
+            <ul>
+              <li>Tirage aléatoire pondéré</li>
+              <li>Respect des probabilités ajustées</li>
+              <li>Génération de la réponse</li>
+            </ul>
 
-     <h2>Exemple détaillé : "Il court au galop, c'est un..."</h2>
+            <h2>Exemple détaillé : "Il court au galop, c'est un..."</h2>
 
-     <h3>Traitement initial</h3>
-     <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
-       <p class="font-bold">Contexte identifié :</p>
-       <ul>
-         <li>Action : courir au galop</li>
-         <li>Champ lexical : mouvement, vitesse</li>
-         <li>Domaine : animaux</li>
-       </ul>
-     </div>
+            <h3>Traitement initial</h3>
+            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
+              <p class="font-bold">Contexte identifié :</p>
+              <ul>
+                <li>Action : courir au galop</li>
+                <li>Champ lexical : mouvement, vitesse</li>
+                <li>Domaine : animaux</li>
+              </ul>
+            </div>
 
-     <h3>Distribution initiale (après Softmax)</h3>
-     <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
-       <pre class="text-sm">
+            <h3>Distribution initiale (après Softmax)</h3>
+            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
+              <pre class="text-sm">
 cheval    : 0.35  | Cumul: 0.35
 étalon    : 0.25  | Cumul: 0.60
 poney     : 0.12  | Cumul: 0.72
 pur-sang  : 0.08  | Cumul: 0.80
 ...
-       </pre>
-     </div>
+              </pre>
+            </div>
 
-     <h3>Application des paramètres</h3>
-     <div class="space-y-4">
-       <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-md">
-         <p class="font-bold">Temperature (0.7):</p>
-         <ul>
-           <li>Conserve une distribution relativement naturelle</li>
-           <li>Légère augmentation des probabilités plus faibles</li>
-         </ul>
-       </div>
+            <h3>Application des paramètres</h3>
+            <div class="space-y-4">
+              <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-md">
+                <p class="font-bold">Temperature (0.7):</p>
+                <ul>
+                  <li>Conserve une distribution relativement naturelle</li>
+                  <li>Légère augmentation des probabilités plus faibles</li>
+                </ul>
+              </div>
 
-       <div class="bg-green-50 dark:bg-green-900 p-4 rounded-md">
-         <p class="font-bold">Top K (5):</p>
-         <ul>
-           <li>Ne garde que les 5 premiers tokens</li>
-           <li>Élimine tous les tokens après "mustang"</li>
-         </ul>
-       </div>
+              <div class="bg-green-50 dark:bg-green-900 p-4 rounded-md">
+                <p class="font-bold">Top K (5):</p>
+                <ul>
+                  <li>Ne garde que les 5 premiers tokens</li>
+                  <li>Élimine tous les tokens après "mustang"</li>
+                </ul>
+              </div>
 
-       <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-md">
-         <p class="font-bold">Top P (0.8):</p>
-         <ul>
-           <li>Garde les tokens jusqu'à probabilité cumulée de 0.8</li>
-           <li>Dans notre cas : cheval, étalon, poney, pur-sang</li>
-         </ul>
-       </div>
-     </div>
+              <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-md">
+                <p class="font-bold">Top P (0.8):</p>
+                <ul>
+                  <li>Garde les tokens jusqu'à probabilité cumulée de 0.8</li>
+                  <li>Dans notre cas : cheval, étalon, poney, pur-sang</li>
+                </ul>
+              </div>
+            </div>
 
-     <h3>Sélection finale</h3>
-     <ul>
-       <li>Tirage aléatoire pondéré parmi les tokens restants</li>
-       <li>Probabilités relatives respectées</li>
-       <li>Exemple : "cheval" a ~61.8% de chances d'être choisi</li>
-     </ul>
+            <h3>Sélection finale</h3>
+            <ul>
+              <li>Tirage aléatoire pondéré parmi les tokens restants</li>
+              <li>Probabilités relatives respectées</li>
+              <li>Exemple : "cheval" a ~61.8% de chances d'être choisi</li>
+            </ul>
 
-     <h2>Limitations de notre visualisation</h2>
-     <p>Notre interface simplifie certains aspects :</p>
-     <ul>
-       <li>Ne montre pas le processus de tokenisation</li>
-       <li>Simplifie l'analyse contextuelle</li>
-       <li>Ne visualise pas l'attention</li>
-       <li>Ne montre pas les embeddings</li>
-       <li>Simplifie le pruning initial</li>
-     </ul>
+            <h2>Limitations de notre visualisation</h2>
+            <p>Notre interface simplifie certains aspects :</p>
+            <ul>
+              <li>Ne montre pas le processus de tokenisation</li>
+              <li>Simplifie l'analyse contextuelle</li>
+              <li>Ne visualise pas l'attention</li>
+              <li>Ne montre pas les embeddings</li>
+              <li>Simplifie le pruning initial</li>
+            </ul>
 
-     <h2>Pour aller plus loin</h2>
-     <div class="grid grid-cols-2 gap-4">
-       <div>
-         <h3>Aspects avancés non couverts</h3>
-         <ul>
-           <li>Attention layers et leur impact</li>
-           <li>Embeddings et espace vectoriel</li>
-           <li>Biais du modèle</li>
-           <li>Impact du contexte étendu</li>
-           <li>Optimisations techniques</li>
-           <li>Techniques d'échantillonnage avancées</li>
-         </ul>
-       </div>
+            <h2>Pour aller plus loin</h2>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <h3>Aspects avancés non couverts</h3>
+                <ul>
+                  <li>Attention layers et leur impact</li>
+                  <li>Embeddings et espace vectoriel</li>
+                  <li>Biais du modèle</li>
+                  <li>Impact du contexte étendu</li>
+                  <li>Optimisations techniques</li>
+                  <li>Techniques d'échantillonnage avancées</li>
+                </ul>
+              </div>
 
-       <div>
-         <h3>Concepts connexes</h3>
-         <ul>
-           <li>Beam search</li>
-           <li>Greedy decoding</li>
-           <li>Température dynamique</li>
-           <li>Échantillonnage typique</li>
-           <li>Pénalités de répétition</li>
-         </ul>
-       </div>
-     </div>
+              <div>
+                <h3>Concepts connexes</h3>
+                <ul>
+                  <li>Beam search</li>
+                  <li>Greedy decoding</li>
+                  <li>Température dynamique</li>
+                  <li>Échantillonnage typique</li>
+                  <li>Pénalités de répétition</li>
+                </ul>
+              </div>
+            </div>
 
-     <h2>Approches de génération de texte</h2>
-     <div class="space-y-4">
-       <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-md">
-         <h4 class="font-bold">Génération standard (Temperature/Top-K/Top-P)</h4>
-         <ul>
-           <li>Considère plusieurs possibilités à chaque étape</li>
-           <li>Utilise un tirage aléatoire pondéré</li>
-           <li>Plus "créatif" et naturel</li>
-         </ul>
-       </div>
+            <h2>Approches de génération de texte</h2>
+            <div class="space-y-4">
+              <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-md">
+                <h4 class="font-bold">Génération standard (Temperature/Top-K/Top-P)</h4>
+                <ul>
+                  <li>Considère plusieurs possibilités à chaque étape</li>
+                  <li>Utilise un tirage aléatoire pondéré</li>
+                  <li>Plus "créatif" et naturel</li>
+                </ul>
+              </div>
 
-       <div class="bg-green-50 dark:bg-green-900 p-4 rounded-md">
-         <h4 class="font-bold">Greedy Decoding</h4>
-         <ul>
-           <li>Prend TOUJOURS le token le plus probable</li>
-           <li>Équivalent à Temperature = 0 ou Top-K = 1</li>
-           <li>Déterministe (même résultat à chaque fois)</li>
-         </ul>
-       </div>
+              <div class="bg-green-50 dark:bg-green-900 p-4 rounded-md">
+                <h4 class="font-bold">Greedy Decoding</h4>
+                <ul>
+                  <li>Prend TOUJOURS le token le plus probable</li>
+                  <li>Équivalent à Temperature = 0 ou Top-K = 1</li>
+                  <li>Déterministe (même résultat à chaque fois)</li>
+                </ul>
+              </div>
 
-       <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-md">
-         <h4 class="font-bold">Beam Search</h4>
-         <ul>
-           <li>Maintient plusieurs chemins possibles en parallèle</li>
-           <li>Explore plusieurs séquences simultanément</li>
-           <li>Plus coûteux mais souvent plus robuste</li>
-         </ul>
-       </div>
-     </div>
-   </div>
+              <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-md">
+                <h4 class="font-bold">Beam Search</h4>
+                <ul>
+                  <li>Maintient plusieurs chemins possibles en parallèle</li>
+                  <li>Explore plusieurs séquences simultanément</li>
+                  <li>Plus coûteux mais souvent plus robuste</li>
+                </ul>
+              </div>
+            </div>
+          </div>
 
-   <DialogFooter>
-     <Button @click="showInfo = false">Fermer</Button>
-   </DialogFooter>
- </DialogContent>
-</Dialog>
+          <DialogFooter>
+            <Button @click="showInfo = false">Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   </div>
 </template>
 
@@ -614,7 +616,7 @@ const filteredTokens = computed(() => {
     topPTokens.push(token)
     cumSum += token.prob
     
-    // On s'arrête dès que la somme cumulée dépasse le seuil de Top P
+    // On s'arrête dès que la somme cumul��e dépasse le seuil de Top P
     if (cumSum >= topP.value) {
       break
     }
@@ -776,5 +778,25 @@ onUnmounted(() => {
 /* Ajustements spécifiques pour la prose dans la dialog */
 :deep(.prose) {
   @apply prose-headings:mb-3 prose-p:mb-3 prose-ul:mb-3 prose-ol:mb-3;
+}
+
+/* Modification des styles des cartes pour plus de contraste */
+:deep(.card) {
+  @apply bg-white dark:bg-[#1e1e1e] shadow-sm border-0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Amélioration du contraste pour les éléments de l'interface */
+:deep(.bg-muted) {
+  @apply bg-gray-50 dark:bg-gray-800;
+}
+
+:deep(.border) {
+  @apply border-gray-100 dark:border-gray-800;
+}
+
+/* Ajustement de l'espacement pour la navbar fixe */
+.container {
+  margin-top: 4rem;
 }
 </style> 

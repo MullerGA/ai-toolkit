@@ -9,6 +9,9 @@
               Apprenez à construire des prompts efficaces étape par étape
             </CardDescription>
           </div>
+          <Button variant="outline" @click="showInfo = true">
+            En savoir plus
+          </Button>
         </div>
       </CardHeader>
 
@@ -82,11 +85,11 @@
 
                         <!-- Échange Humain/IA -->
                         <div class="space-y-4">
-                          <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 p-4 rounded-lg">
+                          <div class="bg-blue-100 dark:bg-blue-900/20 p-4 rounded-lg">
                             <div class="font-medium text-sm mb-2">Humain:</div>
                             <div class="whitespace-pre-line">{{ example.prompt }}</div>
                           </div>
-                          <div class="bg-green-50 dark:bg-green-900 dark:bg-opacity-20 p-4 rounded-lg">
+                          <div class="bg-blue-200 dark:bg-blue-900/30 p-4 rounded-lg">
                             <div class="font-medium text-sm mb-2">IA:</div>
                             <div class="whitespace-pre-line">{{ example.response }}</div>
                           </div>
@@ -95,18 +98,18 @@
                         <!-- Points clés avec positif/négatif -->
                         <div class="mt-4 space-y-4">
                           <div>
-                            <div class="text-sm font-medium text-green-600 mb-2">Points forts:</div>
+                            <div class="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">Points forts:</div>
                             <ul class="space-y-1">
                               <li v-for="(point, pIndex) in example.positivePoints" 
                                   :key="pIndex"
                                   class="flex items-start gap-2 text-sm">
-                                <PlusCircleIcon class="w-4 h-4 text-green-500 mt-1" />
+                                <PlusCircleIcon class="w-4 h-4 text-blue-500 mt-1" />
                                 <span>{{ point }}</span>
                               </li>
                             </ul>
                           </div>
                           <div>
-                            <div class="text-sm font-medium text-red-600 mb-2">Limites:</div>
+                            <div class="text-sm font-medium text-red-600 dark:text-red-400 mb-2">Limites:</div>
                             <ul class="space-y-1">
                               <li v-for="(point, pIndex) in example.negativePoints" 
                                   :key="pIndex"

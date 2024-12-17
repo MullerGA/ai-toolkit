@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <Card class="w-full max-w-7xl mx-auto">
+    <Card class="w-full max-w-7xl mx-auto border-blue-100 dark:border-blue-900">
       <CardHeader class="pb-4 border-b">
         <div class="flex justify-between items-start">
           <div>
@@ -9,6 +9,9 @@
               Collection de modèles de prompts prêts à l'emploi
             </CardDescription>
           </div>
+          <Button variant="outline" @click="showInfo = true">
+            En savoir plus
+          </Button>
         </div>
       </CardHeader>
 
@@ -49,7 +52,7 @@
               :key="tag"
               variant="outline"
               class="cursor-pointer"
-              :class="{ 'bg-primary text-primary-foreground': selectedTags.includes(tag) }"
+              :class="{ 'bg-blue-500 text-white': selectedTags.includes(tag) }"
               @click="toggleTag(tag)"
             >
               {{ tag }}
@@ -59,14 +62,14 @@
 
         <!-- Grille de templates -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card v-for="template in filteredTemplates" :key="template.id" class="hover:shadow-lg transition-shadow">
+          <Card v-for="template in filteredTemplates" :key="template.id" class="hover:shadow-lg transition-shadow border-blue-100 dark:border-blue-900">
             <CardHeader>
               <CardTitle class="text-lg">{{ template.title }}</CardTitle>
               <CardDescription>{{ template.description }}</CardDescription>
             </CardHeader>
             <CardContent>
               <div class="flex flex-wrap gap-2 mb-4">
-                <Badge variant="secondary" v-for="tag in template.tags" :key="tag">
+                <Badge variant="secondary" class="bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
                   {{ tag }}
                 </Badge>
               </div>

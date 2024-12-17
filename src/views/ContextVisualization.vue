@@ -9,7 +9,7 @@
               Visualisez comment le LLM gère le contexte et la mémoire pendant une conversation
             </CardDescription>
           </div>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" @click="showInfo = true">
             En savoir plus
           </Button>
         </div>
@@ -62,7 +62,7 @@
                               'max-w-[85%] scale-100',
                               message.sender === 'human'
                                 ? 'bg-blue-100 dark:bg-blue-900/20'
-                                : 'bg-white dark:bg-gray-800 shadow-md'
+                                : 'bg-blue-50 dark:bg-blue-900/10'
                             ]
                           : [
                               'max-w-[75%] scale-95',
@@ -151,7 +151,7 @@
             <CardContent>
               <div class="space-y-2">
                 <!-- Haute priorité -->
-                <div class="p-2 bg-[#E3F2FD] dark:bg-blue-900/20 rounded-lg">
+                <div class="p-2 bg-[#93c5fd] dark:bg-blue-900/20 rounded-lg">
                   <div class="flex items-center mb-2">
                     <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
                     <span class="text-xs font-medium text-blue-700 dark:text-blue-300">Haute priorité</span>
