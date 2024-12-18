@@ -164,7 +164,7 @@ const learningPath = [
 
 const learningObjectives = [
   "Comprendre en profondeur le fonctionnement des modèles de langage (LLM)",
-  "Maîtriser les paramètres de contrôle pour des r��sultats optimaux",
+  "Maîtriser les paramètres de contrôle pour des résultats optimaux",
   "Visualiser l'impact des différents paramètres sur les générations",
   "Développer une approche méthodique de l'utilisation des LLM",
   "Acquérir les bonnes pratiques professionnelles",

@@ -1136,7 +1136,11 @@ const currentSection = computed(() => {
 
 /* Style du titre */
 .active-section :deep(h2.text-2xl) {
-  @apply my-0 flex items-center text-base font-medium;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-size: 1.75rem;
+  font-weight: 600;
   line-height: 40px;
 }
 
@@ -1152,7 +1156,11 @@ section .w-10.h-10.rounded-full {
 
 /* Style uniforme des titres */
 section h2.text-2xl {
-  @apply my-0 flex items-center text-base font-medium;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  font-weight: 600;
   line-height: 40px;
 }
 
@@ -1232,5 +1240,11 @@ ul li {
 /* Ajuster les espacements pour le texte plus grand */
 .active-section :deep(.space-y-4 > * + *) {
   margin-top: 2rem;
+}
+
+/* Style du numéro de section */
+section .w-10.h-10.rounded-full span {
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 </style> 

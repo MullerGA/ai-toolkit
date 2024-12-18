@@ -308,7 +308,7 @@
 
               <h4>Top P (Nucleus Sampling)</h4>
               <ul>
-                <li>Sélection basée sur la probabilité cumulée</li>
+                <li>Sélection basée sur la probabilité cumul��e</li>
                 <li>Garde les tokens jusqu'à atteindre le seuil P</li>
                 <li>Adaptation dynamique selon le contexte</li>
               </ul>
@@ -616,7 +616,7 @@ const filteredTokens = computed(() => {
     topPTokens.push(token)
     cumSum += token.prob
     
-    // On s'arrête dès que la somme cumul��e dépasse le seuil de Top P
+    // On s'arrête dès que la somme cumulée dépasse le seuil de Top P
     if (cumSum >= topP.value) {
       break
     }
@@ -793,10 +793,5 @@ onUnmounted(() => {
 
 :deep(.border) {
   @apply border-gray-100 dark:border-gray-800;
-}
-
-/* Ajustement de l'espacement pour la navbar fixe */
-.container {
-  margin-top: 4rem;
 }
 </style> 
