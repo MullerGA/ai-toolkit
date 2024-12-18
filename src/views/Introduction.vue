@@ -229,7 +229,7 @@
           </div>
         </section>
 
-        <!-- Section Applications concrètes (maintenant numérotée 3) -->
+        <!-- Section Applications concrètes -->
         <section class="space-y-6">
           <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
@@ -238,23 +238,63 @@
             <h2 class="text-2xl font-semibold">Applications concrètes</h2>
           </div>
 
-          <div class="grid md:grid-cols-2 gap-6">
-            <Card 
-              v-for="(app, index) in applications" 
-              :key="index" 
-              class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md"
-            >
-              <CardHeader>
-                <CardTitle class="text-lg">{{ app.title }}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p class="text-slate-600 dark:text-slate-300">{{ app.description }}</p>
+          <div class="space-y-8">
+            <!-- Texte d'introduction -->
+            <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+              <CardContent class="p-6">
+                <p class="text-lg leading-relaxed space-y-2">
+                  Les <span class="font-medium">LLM</span> révolutionnent de nombreux domaines grâce à leur 
+                  <span class="font-medium">polyvalence</span> et leur capacité à 
+                  <span class="font-medium">comprendre le contexte</span>. Voici les principaux 
+                  <span class="italic">cas d'usage</span> qui transforment déjà notre façon de travailler.
+                </p>
               </CardContent>
             </Card>
+
+            <!-- Modifier la grille des applications -->
+            <div class="grid md:grid-cols-3 gap-6">
+              <!-- Cards existantes et nouvelles -->
+              <Card v-for="(app, index) in applications" :key="index" 
+                    class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+                <CardHeader class="border-b bg-slate-100 dark:bg-slate-700/50">
+                  <CardTitle class="text-lg">{{ app.title }}</CardTitle>
+                </CardHeader>
+                <CardContent class="p-6">
+                  <div class="space-y-4">
+                    <p class="text-slate-600 dark:text-slate-300">{{ app.description }}</p>
+                    <div class="pt-4 border-t">
+                      <h4 class="font-medium text-sm mb-2">Gains potentiels :</h4>
+                      <ul class="text-sm space-y-1">
+                        <li v-for="(advantage, i) in app.advantages" :key="i" 
+                            class="flex items-center gap-2">
+                          <span class="i-lucide-check text-green-500" />
+                          <span>{{ advantage }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <!-- Card d'invitation aux nouveaux usages -->
+              <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md border-dashed border-2 border-blue-200 dark:border-blue-800">
+                <CardContent class="p-6 h-full flex flex-col items-center justify-center text-center">
+                  <div class="space-y-4">
+                    <span class="i-lucide-plus-circle text-4xl text-blue-500" />
+                    <div>
+                      <h3 class="text-lg font-medium mb-2">Votre prochain usage ?</h3>
+                      <p class="text-slate-600 dark:text-slate-300">
+                        Les possibilités sont infinies. Imaginez votre propre cas d'usage en fonction de vos besoins spécifiques.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </section>
 
-        <!-- Section 3: Concepts clés -->
+        <!-- Section Concepts clés -->
         <section class="space-y-6">
           <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
@@ -263,27 +303,67 @@
             <h2 class="text-2xl font-semibold">Concepts clés</h2>
           </div>
 
-          <div class="space-y-4">
-            <Card v-for="(concept, index) in concepts" :key="index" 
-                  class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
-              <CardHeader>
-                <CardTitle class="text-lg">{{ concept.title }}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p class="text-slate-600 dark:text-slate-300">{{ concept.description }}</p>
+          <div class="space-y-8">
+            <!-- Texte d'introduction -->
+            <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+              <CardContent class="p-6">
+                <p class="text-lg leading-relaxed space-y-2">
+                  Pour bien comprendre les <span class="font-medium">LLM</span>, il est essentiel de maîtriser certains 
+                  <span class="font-medium">concepts fondamentaux</span> qui sont au cœur de leur 
+                  <span class="italic">fonctionnement</span> et de leurs <span class="italic">capacités</span>.
+                </p>
               </CardContent>
             </Card>
+
+            <!-- Concepts en grille -->
+            <div class="grid md:grid-cols-3 gap-6">
+              <Card v-for="(concept, index) in concepts" :key="index" 
+                    class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+                <CardHeader class="border-b bg-slate-100 dark:bg-slate-700/50">
+                  <CardTitle class="text-lg">{{ concept.title }}</CardTitle>
+                </CardHeader>
+                <CardContent class="p-6">
+                  <div class="space-y-4">
+                    <p class="text-slate-600 dark:text-slate-300">{{ concept.description }}</p>
+                    <div class="flex items-center justify-center pt-4">
+                      <span class="text-3xl text-blue-500">
+                        <!-- Icône appropriée pour chaque concept -->
+                        <span v-if="index === 0" class="i-lucide-message-square" />
+                        <span v-if="index === 1" class="i-lucide-database" />
+                        <span v-if="index === 2" class="i-lucide-git-branch" />
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </section>
 
-        <!-- Ajouter une note de conclusion -->
+        <!-- Remplacer la note de conclusion -->
         <Card class="bg-slate-50 dark:bg-slate-800/50 mt-4 transition-all hover:shadow-md">
-          <CardContent class="p-4">
-            <div class="flex items-center gap-2">
-              <span class="i-lucide-lightbulb text-yellow-500" />
-              <p class="text-sm text-slate-600 dark:text-slate-300">
-                L'avenir réside dans la combinaison intelligente de ces deux approches, chacune excellant dans son domaine de prédilection.
-              </p>
+          <CardContent class="p-6">
+            <div class="flex flex-col gap-4">
+              <div class="flex items-start gap-3">
+                <span class="i-lucide-lightbulb text-yellow-500 mt-1 flex-shrink-0" />
+                <div class="space-y-2">
+                  <p class="text-slate-600 dark:text-slate-300">
+                    Cette introduction vous a présenté les bases des <span class="font-medium">LLM</span>. 
+                    La suite du parcours vous permettra d'explorer en détail leur fonctionnement interne 
+                    et les différentes manières d'interagir avec eux.
+                  </p>
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <Button 
+                  variant="outline" 
+                  class="flex items-center gap-2"
+                  @click="scrollToTop"
+                >
+                  <span class="i-lucide-arrow-up text-sm" />
+                  Haut de page
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -297,6 +377,7 @@ import { ref, onMounted, computed, nextTick } from 'vue'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Chart from 'chart.js/auto'
+import { useRouter } from 'vue-router'
 
 const chartContainer = ref<HTMLCanvasElement | null>(null)
 const hoveredPoint = ref<null | {
@@ -321,19 +402,48 @@ const showInfo = ref(false)
 const applications = [
   {
     title: "Assistance client",
-    description: "Support 24/7, réponses personnalisées, traitement des requêtes courantes"
+    description: "Support 24/7, réponses personnalisées, traitement des requêtes courantes",
+    advantages: [
+      "Optimisation du temps de réponse client",
+      "Amélioration de l'expérience utilisateur",
+      "Rationalisation des coûts de support"
+    ]
   },
   {
     title: "Analyse de documents",
-    description: "Extraction d'informations, résumés automatiques, classification"
+    description: "Extraction d'informations, résumés automatiques, classification",
+    advantages: [
+      "Valorisation du patrimoine documentaire",
+      "Accélération du traitement des données",
+      "Identification de tendances cachées"
+    ]
   },
   {
     title: "Aide à la rédaction",
-    description: "Suggestions de contenu, correction, amélioration du style"
+    description: "Suggestions de contenu, correction, amélioration du style",
+    advantages: [
+      "Fluidification du processus rédactionnel",
+      "Harmonisation des communications",
+      "Renforcement de la qualité éditoriale"
+    ]
   },
   {
     title: "Automatisation de processus",
-    description: "Traitement des emails, génération de rapports, documentation"
+    description: "Traitement des emails, génération de rapports, documentation",
+    advantages: [
+      "Réduction des tâches manuelles répétitives",
+      "Optimisation des processus métier",
+      "Recentrage sur les activités à valeur ajoutée"
+    ]
+  },
+  {
+    title: "Recherche augmentée",
+    description: "Enrichissement des moteurs de recherche, compréhension des requêtes complexes, synthèse des résultats",
+    advantages: [
+      "Amélioration de la pertinence des résultats",
+      "Contextualisation des recherches",
+      "Synthèse multi-sources intelligente"
+    ]
   }
 ]
 
@@ -591,23 +701,35 @@ const drawModelLabels = () => {
   const ctx = chart.ctx
   evolutionData.forEach((data, index) => {
     const meta = chart.getDatasetMeta(0)
-    if (meta.data[index]) {
-      const point = meta.data[index]
-      ctx.save()
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'bottom'
-      ctx.font = '12px sans-serif'
-      ctx.fillStyle = data.current ? '#3b82f6' : 'rgba(59, 130, 246, 0.6)'
-      ctx.fillText(data.model, point.x, point.y - 15)
-      ctx.restore()
-    }
+    if (!meta || !meta.data[index]) return
+    
+    const point = meta.data[index]
+    ctx.save()
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.font = '12px sans-serif'
+    ctx.fillStyle = data.current ? '#3b82f6' : 'rgba(59, 130, 246, 0.6)'
+    ctx.fillText(data.model, point.x, point.y - 15)
+    ctx.restore()
   })
 }
 
-// Modifier la fonction generateNetworkPoints pour créer un réseau plus étendu et naturel
-const generateNetworkPoints = () => {
-  const points = []
-  const connections = []
+// Ajouter ces interfaces au début du script
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface Connection {
+  from: Point;
+  to: Point;
+  strength: number;
+}
+
+// Modifier la fonction generateNetworkPoints
+const generateNetworkPoints = (): { points: Point[]; connections: Connection[] } => {
+  const points: Point[] = []
+  const connections: Connection[] = []
   
   // Générer plus de points avec une meilleure distribution
   for (let i = 0; i < 15; i++) {
@@ -686,6 +808,28 @@ onMounted(() => {
     svg.appendChild(line)
   })
 })
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
+const router = useRouter()
+
+const goToHomeModule = () => {
+  router.push('/').then(() => {
+    setTimeout(() => {
+      const moduleElement = document.querySelector('[data-module="introduction"]')
+      if (moduleElement) {
+        moduleElement.scrollIntoView({ behavior: 'smooth' })
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    }, 100)
+  })
+}
 </script>
 
 <style scoped>

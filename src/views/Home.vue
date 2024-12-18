@@ -14,7 +14,9 @@
       <!-- Parcours de formation vertical -->
       <div class="max-w-4xl mx-auto space-y-8 mb-16">
         <div v-for="(module, moduleIndex) in learningPath" :key="moduleIndex" 
-          class="bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+          :data-module="moduleIndex === 0 ? 'introduction' : ''"
+          class="bg-white dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden"
+        >
           <!-- En-tête du module -->
           <div class="p-6 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
             <div class="flex items-center">
@@ -97,7 +99,7 @@ const learningPath = [
       {
         title: "Anatomie d'un LLM",
         description: "Plongée dans la structure interne des modèles de langage",
-        route: "/llm-anatomy",
+        route: "/data-processing",
         sections: [
           "Du texte aux tokens : processus de tokenisation",
           "Représentation et relations sémantiques",
@@ -107,7 +109,7 @@ const learningPath = [
       {
         title: "L'Entonnoir de Décision",
         description: "Comprendre le processus de génération de texte",
-        route: "/decision-funnel",
+        route: "/llm-visualization",
         sections: [
           "Processus de génération et paramètres",
           "Démonstration interactive de l'entonnoir",
@@ -117,7 +119,7 @@ const learningPath = [
       {
         title: "Mémoire et Contexte",
         description: "Explorer la gestion du contexte et de la mémoire",
-        route: "/memory-context",
+        route: "/context",
         sections: [
           "Gestion de la conversation et du contexte",
           "Démonstration interactive de la mémoire",
@@ -162,7 +164,7 @@ const learningPath = [
 
 const learningObjectives = [
   "Comprendre en profondeur le fonctionnement des modèles de langage (LLM)",
-  "Maîtriser les paramètres de contrôle pour des résultats optimaux",
+  "Maîtriser les paramètres de contrôle pour des r��sultats optimaux",
   "Visualiser l'impact des différents paramètres sur les générations",
   "Développer une approche méthodique de l'utilisation des LLM",
   "Acquérir les bonnes pratiques professionnelles",
