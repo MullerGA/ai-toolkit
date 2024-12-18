@@ -4,129 +4,45 @@
       <CardHeader class="pb-4 border-b">
         <div class="flex justify-between items-start">
           <div>
-            <CardTitle>Traitement des Données par l'IA</CardTitle>
+            <CardTitle>Anatomie d'un LLM</CardTitle>
             <CardDescription>
-              Visualisation du processus de compréhension du texte
+              Exploration progressive du fonctionnement d'un modèle de langage
             </CardDescription>
           </div>
           <Button variant="outline" @click="showInfo = true">
             En savoir plus
           </Button>
         </div>
+        
+        <div class="mt-6">
+          <div class="flex justify-between mb-2">
+            <span class="text-sm">Étape {{ currentStep }}/{{ totalSteps }}</span>
+            <span class="text-sm font-medium">{{ getCurrentStepTitle }}</span>
+          </div>
+          <div class="flex gap-2 items-center">
+            <div v-for="step in totalSteps" 
+                 :key="step" 
+                 class="flex-1 h-2 rounded-full transition-all duration-300"
+                 :class="[
+                   step === currentStep ? 'bg-primary' : 
+                   step < currentStep ? 'bg-primary/50' : 'bg-muted'
+                 ]"
+                 @click="navigateToStep(step)"
+            />
+          </div>
+        </div>
       </CardHeader>
 
       <div class="p-6">
-        <!-- Section supérieure : Sélection et texte -->
-        <div class="mb-8 space-y-6">
-          <!-- Sélection du scénario -->
-          <div>
-            <h3 class="text-lg font-medium mb-4">Scénarios</h3>
-            <div class="flex gap-4">
-              <Button 
-                v-for="scenario in scenarios" 
-                :key="scenario.id"
-                variant="outline"
-                :class="{ 'bg-primary text-primary-foreground': currentScenario === scenario.id }"
-                @click="selectScenario(scenario.id)"
-              >
-                {{ scenario.name }}
-              </Button>
-            </div>
-          </div>
-
-          <!-- Exemple de texte -->
-          <div>
-            <h3 class="text-lg font-medium mb-2">Texte d'exemple</h3>
-            <div class="bg-muted p-4 rounded-lg">
-              <p class="text-lg">{{ getCurrentScenarioData.text }}</p>
-            </div>
-            <p class="text-sm text-muted-foreground mt-2">{{ getCurrentScenarioData.description }}</p>
-          </div>
-
-          <!-- Tokenisation -->
-          <div>
-            <h3 class="text-lg font-medium mb-4">Tokenisation</h3>
-            <div class="flex flex-wrap gap-2 justify-center">
-              <div v-for="token in tokens" :key="token" 
-                   class="px-3 py-1.5 bg-blue-100 dark:bg-blue-900 rounded-md text-sm">
-                {{ token }}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section inférieure : Grille 5 colonnes -->
-        <div class="grid md:grid-cols-5 gap-8">
-          <!-- Colonne gauche : Représentation vectorielle (2/5) -->
-          <div class="md:col-span-2 space-y-4">
-            <h3 class="text-lg font-medium">Représentation vectorielle</h3>
-            <div class="bg-muted/50 rounded-lg p-4">
-              <div class="space-y-2">
-                <div v-for="vector in vectors" :key="vector.token" 
-                     class="flex items-center justify-between p-2 bg-blue-100 dark:bg-blue-900/20 rounded-md hover:shadow-md transition-shadow">
-                  <span class="font-medium">{{ vector.token }}</span>
-                  <span class="font-mono text-sm text-muted-foreground">
-                    [{{ vector.values.map(v => v.toFixed(2)).join(', ') }}]
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Colonne droite : Relations sémantiques (3/5) -->
-          <div class="md:col-span-3 space-y-4">
-            <h3 class="text-lg font-medium">Relations sémantiques</h3>
-            <div class="bg-muted/50 rounded-lg p-4">
-              <svg width="100%" height="300" class="semantic-graph">
-                <!-- Nœuds -->
-                <g v-for="node in semanticNodes" :key="node.id">
-                  <circle
-                    :cx="node.x"
-                    :cy="node.y"
-                    r="40"
-                    class="fill-blue-100 hover:fill-blue-200 dark:fill-blue-900/20 dark:hover:fill-blue-900/30 cursor-pointer"
-                  />
-                  <text
-                    :x="node.x"
-                    :y="node.y"
-                    text-anchor="middle"
-                    alignment-baseline="middle"
-                    class="text-sm font-medium pointer-events-none"
-                  >
-                    {{ node.label }}
-                  </text>
-                </g>
-                <!-- Liens -->
-                <g>
-                  <line
-                    v-for="(link, index) in semanticLinks"
-                    :key="index"
-                    :x1="link.source.x"
-                    :y1="link.source.y"
-                    :x2="link.target.x"
-                    :y2="link.target.y"
-                    class="stroke-blue-300 dark:stroke-blue-700"
-                    stroke-width="2"
-                  />
-                  <text
-                    v-for="(link, index) in semanticLinks"
-                    :key="'label-' + index"
-                    :x="(link.source.x + link.target.x) / 2"
-                    :y="(link.source.y + link.target.y) / 2 - 10"
-                    text-anchor="middle"
-                    class="text-xs fill-muted-foreground"
-                  >
-                    {{ link.label }}
-                  </text>
-                </g>
-              </svg>
-            </div>
-          </div>
-        </div>
+        <component 
+          :is="getCurrentStepComponent" 
+          :scenario="currentScenario"
+          :scenarios="scenarios"
+          @update:scenario="currentScenario = $event"
+        />
       </div>
     </Card>
 
-    <!-- Modal d'information -->
     <Dialog v-model:open="showInfo">
       <DialogContent>
         <DialogHeader>
@@ -161,148 +77,118 @@
 import { ref, computed } from 'vue'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+
+import TokenizationStep from './steps/TokenizationStep.vue'
+import VectorRepresentationStep from './steps/VectorRepresentationStep.vue'
+import AttentionMechanismStep from './steps/AttentionMechanismStep.vue'
+import ResponseGenerationStep from './steps/ResponseGenerationStep.vue'
 
 const showInfo = ref(false)
+const currentStep = ref(1)
+const totalSteps = 4
 
-interface ScenarioData {
-  id: string
-  name: string
-  text: string
-  description: string
-  tokens: string[]
-  vectors: Array<{
-    token: string
-    values: number[]
-  }>
-  semanticNodes: Array<{
-    id: number
-    label: string
-    x: number
-    y: number
-  }>
-  semanticLinks: Array<{
-    source: { x: number; y: number }
-    target: { x: number; y: number }
-    label: string
-  }>
-}
-
-// Définition des scénarios
-const scenarios: ScenarioData[] = [
-{
-    id: 'computer_science',
-    name: 'Intelligence Artificielle',
-    text: 'L\'intelligence artificielle transforme rapidement notre société',
-    tokens: ['L\'', 'intelligence', 'artificielle', 'transform', 'e', 'rapid', 'ement', 'notre', 'société'],
-    vectors: [
-      { token: 'L\'', values: [0.1, 0.1, 0.1] },
-      { token: 'intelligence', values: [0.8, 0.6, 0.7] },
-      { token: 'artificielle', values: [0.9, 0.7, 0.8] },
-      { token: 'transform', values: [0.7, 0.8, 0.6] },
-      { token: 'e', values: [0.1, 0.1, 0.1] },
-      { token: 'rapid', values: [0.6, 0.7, 0.5] },
-      { token: 'ement', values: [0.2, 0.3, 0.2] },
-      { token: 'notre', values: [0.3, 0.4, 0.3] },
-      { token: 'société', values: [0.7, 0.8, 0.7] }
+const steps = [
+  {
+    id: 1,
+    title: 'Du Texte aux Tokens',
+    component: TokenizationStep,
+  },
+  {
+    id: 2,
+    title: 'La Représentation Vectorielle',
+    component: VectorRepresentationStep,
+  },
+  {
+    id: 3,
+    title: 'Les Mécanismes d\'Attention',
+    component: AttentionMechanismStep,
+  },
+  {
+    id: 4,
+    title: 'La Génération de Réponses',
+    component: ResponseGenerationStep,
+  },
+]
+const scenarios = [
+  {
+    id: 'simple',
+    name: 'Exemple Simple',
+    input: 'Le chat dort sur le tapis',
+    tokens: [
+      { token: 'Le', vector: [0.10, 0.10, 0.10] },
+      { token: 'chat', vector: [0.82, 0.45, 0.65] },
+      { token: 'dort', vector: [0.35, 0.78, 0.42] },
+      { token: 'sur', vector: [0.20, 0.15, 0.25] },
+      { token: 'le', vector: [0.10, 0.10, 0.10] },
+      { token: 'tap', vector: [0.55, 0.40, 0.70] },
+      { token: 'is', vector: [0.45, 0.35, 0.65] }
     ],
-    semanticNodes: [
-      { id: 1, label: 'intelligence artificielle', x: 150, y: 100 },
-      { id: 2, label: 'transforme', x: 300, y: 100 },
-      { id: 3, label: 'société', x: 450, y: 100 },
-      { id: 4, label: 'rapidement', x: 300, y: 200 }
-    ],
-    semanticLinks: [
-      {
-        source: { x: 150, y: 100 },
-        target: { x: 300, y: 100 },
-        label: '0.9 (sujet-verbe)'
-      },
-      {
-        source: { x: 300, y: 100 },
-        target: { x: 450, y: 100 },
-        label: '0.8 (verbe-objet)'
-      },
-      {
-        source: { x: 300, y: 100 },
-        target: { x: 300, y: 200 },
-        label: '0.7 (modification)'
-      }
-    ]
+    description: "Les articles 'Le' et 'le' partagent le même vecteur, tandis que les parties du mot 'tapis' ont des vecteurs proches mais distincts."
   },
   {
     id: 'science',
     name: 'Découverte Scientifique',
-    text: 'Les chercheurs ont découvert une nouvelle particule subatomique fascinante',
-    tokens: ['Les', 'cherch', 'eurs', 'ont', 'découvert', 'une', 'nouvelle', 'particule', 'sub', 'atom', 'ique', 'fascin', 'ante'],
-    vectors: [
-      { token: 'Les', values: [0.2, 0.1, 0.1] },
-      { token: 'cherch', values: [0.7, 0.6, 0.6] },
-      { token: 'eurs', values: [0.3, 0.2, 0.2] },
-      { token: 'ont', values: [0.2, 0.2, 0.1] },
-      { token: 'découvert', values: [0.8, 0.7, 0.7] },
-      { token: 'une', values: [0.1, 0.1, 0.1] },
-      { token: 'nouvelle', values: [0.6, 0.5, 0.5] },
-      { token: 'particule', values: [0.8, 0.8, 0.7] },
-      { token: 'sub', values: [0.5, 0.6, 0.5] },
-      { token: 'atom', values: [0.7, 0.7, 0.6] },
-      { token: 'ique', values: [0.2, 0.2, 0.2] },
-      { token: 'fascin', values: [0.6, 0.7, 0.5] },
-      { token: 'ante', values: [0.2, 0.3, 0.2] }
+    input: 'Les chercheurs ont découvert une particule subatomique',
+    tokens: [
+      { token: 'Les', vector: [0.12, 0.08, 0.15] },
+      { token: 'cherch', vector: [0.75, 0.85, 0.70] },
+      { token: 'eurs', vector: [0.65, 0.75, 0.60] },
+      { token: 'ont', vector: [0.25, 0.30, 0.20] },
+      { token: 'découv', vector: [0.80, 0.90, 0.75] },
+      { token: 'ert', vector: [0.70, 0.80, 0.65] },
+      { token: 'une', vector: [0.15, 0.12, 0.18] },
+      { token: 'parti', vector: [0.88, 0.92, 0.85] },
+      { token: 'cule', vector: [0.82, 0.88, 0.80] },
+      { token: 'sub', vector: [0.95, 0.90, 0.92] },
+      { token: 'atom', vector: [0.92, 0.95, 0.88] },
+      { token: 'ique', vector: [0.85, 0.82, 0.78] }
     ],
-    semanticNodes: [
-      { id: 1, label: 'chercheurs', x: 150, y: 100 },
-      { id: 2, label: 'découvert', x: 300, y: 100 },
-      { id: 3, label: 'particule', x: 450, y: 100 },
-      { id: 4, label: 'subatomique', x: 450, y: 200 },
-      { id: 5, label: 'fascinante', x: 600, y: 150 }
+    description: "Les tokens scientifiques (atom, sub, parti) sont regroupés dans une région similaire de l'espace vectoriel, tandis que les éléments grammaticaux sont ailleurs."
+  },
+  {
+    id: 'multilingual',
+    name: 'Exemple Multilingue',
+    input: "L'interface utilisateur est user-friendly",
+    tokens: [
+      { token: "L'", vector: [0.10, 0.12, 0.08] },
+      { token: 'inter', vector: [0.78, 0.82, 0.75] },
+      { token: 'face', vector: [0.72, 0.75, 0.70] },
+      { token: 'util', vector: [0.65, 0.70, 0.62] },
+      { token: 'isa', vector: [0.60, 0.65, 0.58] },
+      { token: 'teur', vector: [0.55, 0.60, 0.52] },
+      { token: 'est', vector: [0.20, 0.25, 0.18] },
+      { token: 'user', vector: [0.85, 0.88, 0.82] },
+      { token: 'friendly', vector: [0.82, 0.85, 0.80] }
     ],
-    semanticLinks: [
-      {
-        source: { x: 150, y: 100 },
-        target: { x: 300, y: 100 },
-        label: '0.8 (agent)'
-      },
-      {
-        source: { x: 300, y: 100 },
-        target: { x: 450, y: 100 },
-        label: '0.9 (objet)'
-      },
-      {
-        source: { x: 450, y: 100 },
-        target: { x: 450, y: 200 },
-        label: '0.8 (qualification)'
-      },
-      {
-        source: { x: 450, y: 100 },
-        target: { x: 600, y: 150 },
-        label: '0.7 (description)'
-      }
-    ]
+    description: "Les tokens anglais (user, friendly) sont proches entre eux, tandis que les tokens français techniques forment un autre groupe cohérent."
   }
-]
+];
 
-const currentScenario = ref('computer_science')
-
-const getCurrentScenarioData = computed(() => {
-  return scenarios.find(s => s.id === currentScenario.value) || scenarios[0]
+const getCurrentStepTitle = computed(() => {
+  return steps.find(step => step.id === currentStep.value)?.title
 })
 
-// Mise à jour des refs avec les données du scénario
-const tokens = computed(() => getCurrentScenarioData.value.tokens)
-const vectors = computed(() => getCurrentScenarioData.value.vectors)
-const semanticNodes = computed(() => getCurrentScenarioData.value.semanticNodes)
-const semanticLinks = computed(() => getCurrentScenarioData.value.semanticLinks)
+const getCurrentStepComponent = computed(() => {
+  return steps.find(step => step.id === currentStep.value)?.component
+})
 
-const selectScenario = (id: string) => {
-  currentScenario.value = id
+const currentScenario = ref('simple')
+
+const navigateToStep = (step: number) => {
+  currentStep.value = step
+}
+
+const nextStep = () => {
+  if (currentStep.value < totalSteps) {
+    currentStep.value++
+  }
+}
+
+const previousStep = () => {
+  if (currentStep.value > 1) {
+    currentStep.value--
+  }
 }
 </script>
 
