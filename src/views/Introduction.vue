@@ -1205,4 +1205,32 @@ ul li {
 .card-header .card-description {
   @apply text-xs;
 }
+
+/* Augmenter la taille des textes en mode focus */
+.active-section :deep(p) {
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.active-section :deep(.card-title) {
+  font-size: 1.25rem;
+}
+
+.active-section :deep(.card-description) {
+  font-size: 1rem;
+}
+
+.active-section :deep(ul li) {
+  font-size: 1rem;
+}
+
+.active-section :deep(h2.text-2xl) {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* Ajuster les espacements pour le texte plus grand */
+.active-section :deep(.space-y-4 > * + *) {
+  margin-top: 2rem;
+}
 </style> 
