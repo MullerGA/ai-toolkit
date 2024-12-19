@@ -1,7 +1,8 @@
-const animate = require("tailwindcss-animate")
+import animate from "tailwindcss-animate"
+import typography from "@tailwindcss/typography"
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   darkMode: ["class"],
   safelist: ["dark"],
   prefix: "",
@@ -11,7 +12,7 @@ module.exports = {
     './components/**/*.{ts,tsx,vue}',
     './app/**/*.{ts,tsx,vue}',
     './src/**/*.{ts,tsx,vue}',
-	],
+  ],
   
   theme: {
     container: {
@@ -90,7 +91,7 @@ module.exports = {
     },
   },
   plugins: [
-    require("@tailwindcss/typography"),
+    typography,
     animate,
   ],
 }

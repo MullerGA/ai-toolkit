@@ -1,13 +1,7 @@
 import { ref, computed, onMounted } from 'vue'
-import { pipeline, env } from '@xenova/transformers'
+import { pipeline } from '@xenova/transformers'
 
 // Configuration de base
-env.useCDN = true
-env.cacheDir = './.cache'
-env.localCache = true
-env.allowRemoteModels = true
-
-// Configuration du modèle avec un CDN alternatif
 const MODEL_CONFIG = {
   model: 'Xenova/tiny-gpt2',
   revision: 'main',
@@ -15,16 +9,6 @@ const MODEL_CONFIG = {
   config: {
     model_url: 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.15.1/models/Xenova/tiny-gpt2/',
     tokenizer_url: 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.15.1/tokenizers/Xenova/tiny-gpt2/'
-  }
-}
-
-// Fonction utilitaire pour vérifier si une URL est valide
-const isValidUrl = (url: string) => {
-  try {
-    new URL(url)
-    return true
-  } catch {
-    return false
   }
 }
 

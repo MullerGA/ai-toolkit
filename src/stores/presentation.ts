@@ -56,16 +56,5 @@ export const usePresentationStore = defineStore('presentation', {
         sectionElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
     }
-  },
-
-  persist: {
-    enabled: true,
-    strategies: [
-      {
-        key: 'presentation-state',
-        storage: localStorage,
-        paths: ['currentSection', 'isFocusMode']
-      }
-    ]
   }
 })
