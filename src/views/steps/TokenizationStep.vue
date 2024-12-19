@@ -1,13 +1,21 @@
 <template>
   <div class="space-y-8">
-    <!-- Sélection du texte à analyser - Maintenant en premier -->
+    <!-- Introduction -->
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <p class="text-base leading-relaxed">
+          La <span class="font-medium">première étape</span> du traitement d'un texte par un 
+          <span class="font-medium">LLM</span> est la <span class="font-medium">tokenisation</span> : 
+          le découpage du texte en <span class="italic">unités élémentaires</span> appelées 
+          "<span class="font-medium text-primary">tokens</span>". Ces tokens peuvent être des 
+          <span class="italic">mots entiers</span>, des <span class="italic">parties de mots</span>, 
+          ou même des <span class="italic">caractères individuels</span>.
+        </p>
+      </CardContent>
+    </Card>
+
+    <!-- Sélection du texte à analyser -->
     <div>
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-sm font-medium">Type d'exemple</h3>
-        <span class="text-sm text-muted-foreground">
-          {{ getWordCount }} mots
-        </span>
-      </div>
       
       <div class="flex gap-3">
         <Button
@@ -22,20 +30,6 @@
         </Button>
       </div>
     </div>
-
-    <!-- Introduction -->
-    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
-      <CardContent class="p-6">
-        <p class="text-base leading-relaxed">
-          La <span class="font-medium">première étape</span> du traitement d'un texte par un 
-          <span class="font-medium">LLM</span> est la <span class="font-medium">tokenisation</span> : 
-          le découpage du texte en <span class="italic">unités élémentaires</span> appelées 
-          "<span class="font-medium text-primary">tokens</span>". Ces tokens peuvent être des 
-          <span class="italic">mots entiers</span>, des <span class="italic">parties de mots</span>, 
-          ou même des <span class="italic">caractères individuels</span>.
-        </p>
-      </CardContent>
-    </Card>
 
     <!-- Processus de tokenisation -->
     <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">

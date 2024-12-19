@@ -1,13 +1,17 @@
 <template>
   <div class="space-y-8">
     <!-- Introduction -->
-    <div class="bg-muted/50 rounded-lg p-4">
-      <p class="text-base leading-relaxed">
-        Le mécanisme d'attention est au cœur des LLMs modernes. Il permet au modèle de "concentrer" 
-        son analyse sur les relations pertinentes entre les différents tokens d'une phrase, comme 
-        le ferait un lecteur humain.
-      </p>
-    </div>
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <p class="text-base leading-relaxed">
+          Le <span class="font-medium">mécanisme d'attention</span> est au cœur des 
+          <span class="font-medium">LLMs</span> modernes. Il permet au modèle de 
+          <span class="italic">"concentrer" son analyse</span> sur les 
+          <span class="font-medium text-primary">relations pertinentes</span> entre les différents tokens 
+          d'une phrase, comme le ferait un <span class="italic">lecteur humain</span>.
+        </p>
+      </CardContent>
+    </Card>
 
     <!-- Sélection du scénario -->
     <div class="flex gap-4">
@@ -23,141 +27,148 @@
     </div>
 
     <!-- Visualisation centrale de l'attention -->
-    <div class="bg-muted/50 rounded-lg p-6">
-      <div class="space-y-4">
-        <div>
-          <h3 class="text-lg font-medium mb-2">Mécanisme d'attention</h3>
-          <p class="text-sm text-muted-foreground mb-4">
-            La visualisation ci-dessous montre comment chaque token interagit avec les autres. 
-            Cette "attention" permet au modèle de comprendre le contexte et les relations entre les mots.
-          </p>
-          <p class="text-sm text-muted-foreground italic">
-            Sélectionnez un mot pour voir ses relations avec les autres tokens.
-          </p>
-        </div>
-
-        <!-- Mots alignés horizontalement -->
-        <div class="flex justify-between px-4">
-          <button
-            v-for="(word, index) in words"
-            :key="index"
-            class="px-3 py-1.5 rounded-md text-sm transition-colors"
-            :class="{
-              'bg-primary text-primary-foreground': selectedWordIndex === index,
-              'hover:bg-muted/80': selectedWordIndex !== index
-            }"
-            @click="selectWord(index)"
-          >
-            {{ word }}
-          </button>
-        </div>
-
-        <!-- "Touches de piano" pour les scores d'attention -->
-        <div v-if="selectedWordIndex !== null" class="flex justify-between px-4">
-          <div
-            v-for="(score, index) in getAttentionScores(selectedWordIndex)"
-            :key="index"
-            class="w-12 h-20 transition-all duration-300 flex flex-col items-center"
-          >
-            <!-- Pourcentage -->
-            <div 
-              v-if="index !== selectedWordIndex && score > 0.1" 
-              class="text-xs text-center mb-1"
-            >
-              {{ (score * 100).toFixed(0) }}%
-            </div>
-            
-            <!-- Touche -->
-            <div
-              v-if="index !== selectedWordIndex"
-              class="w-full flex-1 rounded-b-sm"
-              :style="{
-                backgroundColor: `rgb(var(--primary))`,
-                opacity: score
-              }"
-            />
-            <div
-              v-else
-              class="w-full flex-1"
-            />
-          </div>
-        </div>
-
-        <div class="text-sm text-muted-foreground mt-4">
-          <p class="font-medium mb-2">Les barres représentent l'intensité de l'attention :</p>
-          <ul class="list-disc list-inside space-y-1">
-            <li>Une intesité haute indique une forte connexion entre les tokens</li>
-            <li>Une intesité basse suggère une relation plus faible</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- Analyse contextuelle -->
-    <div class="bg-muted/50 rounded-lg p-4">
-      <h3 class="text-lg font-medium mb-4">Analyse contextuelle</h3>
-      <div v-if="selectedWordIndex !== null" class="space-y-6">
-        <div>
-          <h4 class="text-sm font-medium mb-2">Token sélectionné</h4>
-          <p class="text-lg font-medium text-primary">
-            "{{ words[selectedWordIndex] }}"
-          </p>
-        </div>
-        <div>
-          <h4 class="text-sm font-medium mb-2">Relations principales</h4>
-          <ul class="space-y-2">
-            <li 
-              v-for="(relation, index) in getTopRelations(selectedWordIndex)" 
-              :key="index"
-              class="flex items-center gap-2"
-            >
-              <span class="text-sm">{{ relation.word }}</span>
-              <span class="text-xs text-muted-foreground">({{ relation.type }})</span>
-            </li>
-          </ul>
-        </div>
-
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
         <div class="space-y-4">
           <div>
-            <h4 class="text-sm font-medium mb-2">Relations Principales</h4>
-            <p class="text-sm text-muted-foreground">
-              Les liens identifiés (Complément, Sujet-Verbe, etc.) montrent comment le modèle 
-              comprend la structure grammaticale et sémantique de la phrase. Ces relations
-              sont essentielles pour la compréhension globale du texte.
+            <h3 class="text-lg font-medium mb-2">Mécanisme d'attention</h3>
+            <p class="text-sm text-muted-foreground mb-4">
+              La visualisation ci-dessous montre comment chaque token interagit avec les autres. 
+              Cette "attention" permet au modèle de comprendre le contexte et les relations entre les mots.
+            </p>
+            <p class="text-sm text-muted-foreground italic">
+              Sélectionnez un mot pour voir ses relations avec les autres tokens.
             </p>
           </div>
 
-          <div>
-            <h4 class="text-sm font-medium mb-2">Points clés</h4>
-            <ul class="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Chaque token peut avoir plusieurs relations importantes</li>
-              <li>L'attention est bidirectionnelle : les tokens s'influencent mutuellement</li>
-              <li>Le contexte global influence la force des relations</li>
+          <!-- Mots alignés horizontalement -->
+          <div class="flex justify-between px-4">
+            <button
+              v-for="(word, index) in words"
+              :key="index"
+              class="px-3 py-1.5 rounded-md text-sm transition-colors"
+              :class="{
+                'bg-primary text-primary-foreground': selectedWordIndex === index,
+                'hover:bg-muted/80': selectedWordIndex !== index
+              }"
+              @click="selectWord(index)"
+            >
+              {{ word }}
+            </button>
+          </div>
+
+          <!-- "Touches de piano" pour les scores d'attention -->
+          <div v-if="selectedWordIndex !== null" class="flex justify-between px-4">
+            <div
+              v-for="(score, index) in getAttentionScores(selectedWordIndex)"
+              :key="index"
+              class="w-12 h-20 transition-all duration-300 flex flex-col items-center"
+            >
+              <!-- Pourcentage -->
+              <div 
+                v-if="index !== selectedWordIndex && score > 0.1" 
+                class="text-xs text-center mb-1"
+              >
+                {{ (score * 100).toFixed(0) }}%
+              </div>
+              
+              <!-- Touche -->
+              <div
+                v-if="index !== selectedWordIndex"
+                class="w-full flex-1 rounded-b-sm"
+                :style="{
+                  backgroundColor: `rgb(var(--primary))`,
+                  opacity: score
+                }"
+              />
+              <div
+                v-else
+                class="w-full flex-1"
+              />
+            </div>
+          </div>
+
+          <div class="text-sm text-muted-foreground mt-4">
+            <p class="font-medium mb-2">Les barres représentent l'intensité de l'attention :</p>
+            <ul class="list-disc list-inside space-y-1">
+              <li>Une intesité haute indique une forte connexion entre les tokens</li>
+              <li>Une intesité basse suggère une relation plus faible</li>
             </ul>
           </div>
         </div>
-      </div>
-      <div v-else class="text-center text-muted-foreground">
-        Sélectionnez un mot pour voir son analyse contextuelle
-      </div>
-    </div>
+      </CardContent>
+    </Card>
+
+    <!-- Analyse contextuelle -->
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <h3 class="text-lg font-medium mb-4">Analyse contextuelle</h3>
+        <div v-if="selectedWordIndex !== null" class="space-y-6">
+          <div>
+            <h4 class="text-sm font-medium mb-2">Token sélectionné</h4>
+            <p class="text-lg font-medium text-primary">
+              "{{ words[selectedWordIndex] }}"
+            </p>
+          </div>
+          <div>
+            <h4 class="text-sm font-medium mb-2">Relations principales</h4>
+            <ul class="space-y-2">
+              <li 
+                v-for="(relation, index) in getTopRelations(selectedWordIndex)" 
+                :key="index"
+                class="flex items-center gap-2"
+              >
+                <span class="text-sm">{{ relation.word }}</span>
+                <span class="text-xs text-muted-foreground">({{ relation.type }})</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <h4 class="text-sm font-medium mb-2">Relations Principales</h4>
+              <p class="text-sm text-muted-foreground">
+                Les liens identifiés (Complément, Sujet-Verbe, etc.) montrent comment le modèle 
+                comprend la structure grammaticale et sémantique de la phrase. Ces relations
+                sont essentielles pour la compréhension globale du texte.
+              </p>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-medium mb-2">Points clés</h4>
+              <ul class="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                <li>Chaque token peut avoir plusieurs relations importantes</li>
+                <li>L'attention est bidirectionnelle : les tokens s'influencent mutuellement</li>
+                <li>Le contexte global influence la force des relations</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-center text-muted-foreground">
+          Sélectionnez un mot pour voir son analyse contextuelle
+        </div>
+      </CardContent>
+    </Card>
 
     <!-- Note technique -->
-    <div class="bg-primary/5 rounded-lg p-4 border border-primary/10">
-      <h4 class="font-medium text-primary mb-2">Note technique</h4>
-      <p class="text-sm leading-relaxed">
-        En réalité, un LLM utilise plusieurs "têtes d'attention" en parallèle, chacune 
-        pouvant capturer différents types de relations (grammaticales, sémantiques, 
-        contextuelles...). Notre visualisation montre une version simplifiée de ce 
-        mécanisme complexe.
-      </p>
-    </div>
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <h4 class="font-medium text-primary mb-2">Note technique</h4>
+        <p class="text-sm leading-relaxed">
+          En réalité, un LLM utilise plusieurs "têtes d'attention" en parallèle, chacune 
+          pouvant capturer différents types de relations (grammaticales, sémantiques, 
+          contextuelles...). Notre visualisation montre une version simplifiée de ce 
+          mécanisme complexe.
+        </p>
+      </CardContent>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 interface Token {
   token: string

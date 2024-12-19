@@ -1,13 +1,16 @@
 <template>
   <div class="space-y-8">
     <!-- Introduction -->
-    <div class="bg-muted/50 rounded-lg p-4">
-      <p class="text-base leading-relaxed">
-        La génération de réponses est l'étape finale où le LLM produit du texte token par token. 
-        Cette génération est un processus complexe qui peut être ajusté et optimisé de 
-        différentes manières.
-      </p>
-    </div>
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <p class="text-base leading-relaxed">
+          La <span class="font-medium">génération de réponses</span> est l'étape finale où le 
+          <span class="font-medium">LLM</span> produit du texte <span class="italic">token par token</span>. 
+          Cette génération est un <span class="font-medium text-primary">processus complexe</span> qui peut 
+          être <span class="italic">ajusté et optimisé</span> de différentes manières.
+        </p>
+      </CardContent>
+    </Card>
 
     <!-- Sélection du scénario -->
     <div class="flex gap-4">
@@ -164,34 +167,39 @@
     </div>
 
     <!-- Pour aller plus loin -->
-    <div class="bg-muted/30 rounded-lg p-4">
-      <h4 class="font-medium mb-3">Pour aller plus loin</h4>
-      <p class="text-sm text-muted-foreground mb-2">
-        Découvrez notre visualisation de "L'Entonnoir de Décision LLM" pour comprendre en détail :
-      </p>
-      <ul class="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-        <li>Comment la température influence la distribution des probabilités</li>
-        <li>L'impact du Top-K sur la sélection des tokens</li>
-        <li>Le rôle du Top-P dans le filtrage des choix</li>
-        <li>La transformation progressive des probabilités à chaque étape</li>
-      </ul>
-    </div>
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <h4 class="font-medium mb-3">Pour aller plus loin</h4>
+        <p class="text-sm text-muted-foreground mb-2">
+          Découvrez notre visualisation de "L'Entonnoir de Décision LLM" pour comprendre en détail :
+        </p>
+        <ul class="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+          <li>Comment la température influence la distribution des probabilités</li>
+          <li>L'impact du Top-K sur la sélection des tokens</li>
+          <li>Le rôle du Top-P dans le filtrage des choix</li>
+          <li>La transformation progressive des probabilités à chaque étape</li>
+        </ul>
+      </CardContent>
+    </Card>
 
     <!-- Note de conclusion -->
-    <div class="bg-primary/5 rounded-lg p-4 border border-primary/10">
-      <p class="text-sm leading-relaxed">
-        La génération de texte par un LLM utilise un système sophistiqué de filtrage
-        des probabilités. Notre visualisation interactive de l'entonnoir vous permettra
-        d'explorer et de comprendre comment ces différents paramètres façonnent
-        la génération finale du texte.
-      </p>
-    </div>
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <p class="text-sm leading-relaxed">
+          La génération de texte par un LLM utilise un système sophistiqué de filtrage
+          des probabilités. Notre visualisation interactive de l'entonnoir vous permettra
+          d'explorer et de comprendre comment ces différents paramètres façonnent
+          la génération finale du texte.
+        </p>
+      </CardContent>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 interface Token {
   token: string

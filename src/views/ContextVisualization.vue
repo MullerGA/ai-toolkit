@@ -1,6 +1,6 @@
 <template>
   <div class="container mx-auto px-4 py-8">
-    <Card class="w-full max-w-7xl mx-auto">
+    <Card class="w-full max-w-7xl mx-auto bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
       <CardHeader class="pb-2 border-b">
         <div class="flex justify-between items-start">
           <div>
@@ -15,8 +15,66 @@
         </div>
       </CardHeader>
 
+      <!-- Ajouter juste après le CardHeader -->
+      <div class="p-4 space-y-6">
+        <!-- Introduction -->
+        <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+          <CardContent class="p-6 space-y-4">
+            <div class="flex items-start gap-4">
+              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                <LightBulbIcon class="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <h3 class="font-medium mb-2">Comment fonctionne la mémoire d'un LLM ?</h3>
+                <p class="text-sm text-muted-foreground">
+                  Un LLM utilise deux mécanismes principaux pour maintenir le contexte d'une conversation :
+                </p>
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                  <!-- Fenêtre de contexte -->
+                  <div class="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50">
+                    <h4 class="text-sm font-medium text-blue-700 dark:text-blue-300 mb-2 flex items-center gap-2">
+                      <DocumentTextIcon class="h-4 w-4" />
+                      Fenêtre de contexte
+                    </h4>
+                    <p class="text-sm text-blue-600 dark:text-blue-200">
+                      Informations immédiatement disponibles pour le modèle, comme une mémoire de travail.
+                    </p>
+                  </div>
+                  <!-- Pile de mémoire -->
+                  <div class="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/50">
+                    <h4 class="text-sm font-medium text-green-700 dark:text-green-300 mb-2 flex items-center gap-2">
+                      <QueueListIcon class="h-4 w-4" />
+                      Pile de mémoire
+                    </h4>
+                    <p class="text-sm text-green-600 dark:text-green-200">
+                      Informations stockées avec différentes priorités, comme une mémoire à long terme.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <!-- Légende -->
+        <div class="flex items-center justify-center gap-6 text-sm">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+            <span class="text-muted-foreground">Haute priorité</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+            <span class="text-muted-foreground">Moyenne priorité</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-orange-500"></div>
+            <span class="text-muted-foreground">Basse priorité</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Timeline -->
-      <div class="p-2 bg-white dark:bg-gray-800 mb-2">
+      <div class="p-2 mb-2">
         <div class="relative pt-2 pb-2">
           <div class="absolute h-[2px] bg-blue-200 left-0 right-0 top-[12px]"></div>
           <div class="relative flex justify-between">
@@ -35,14 +93,14 @@
       <div class="grid grid-cols-12 gap-4 p-4">
         <!-- Zone Conversation (8/12) -->
         <div class="col-span-8">
-          <Card class="h-full">
-            <CardHeader class="pb-2">
+          <Card class="h-full bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+            <CardHeader class="pb-2 border-b bg-slate-100 dark:bg-slate-700/50">
               <CardTitle class="text-base">Conversation</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+            <CardContent class="relative h-[600px]">
+              <div class="absolute inset-0 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
                 <div 
-                  class="space-y-4 h-[500px] overflow-y-auto conversation-container" 
+                  class="h-full overflow-y-auto conversation-container" 
                   ref="chatContainer"
                 >
                   <TransitionGroup 
@@ -101,16 +159,16 @@
 
         <!-- Zone État des Mémoires (4/12) -->
         <div class="col-span-4 space-y-4">
-          <!-- Context Window -->
-          <Card>
-            <CardHeader class="pb-2">
+          <!-- Context Window avec hauteur fixe -->
+          <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+            <CardHeader class="pb-2 border-b bg-slate-100 dark:bg-slate-700/50">
               <CardTitle class="text-base">Context Window</CardTitle>
               <CardDescription class="text-xs">
                 Fenêtre de contexte immédiat utilisée par le modèle
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+            <CardContent class="h-[200px] overflow-y-auto">
+              <div class="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
                 <!-- Contexte Actif -->
                 <div class="mb-4">
                   <div class="flex items-center mb-2">
@@ -140,51 +198,51 @@
             </CardContent>
           </Card>
 
-          <!-- Memory Stack -->
-          <Card>
+          <!-- Memory Stack avec hauteur fixe -->
+          <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
             <CardHeader class="pb-2">
               <CardTitle class="text-base">Memory Stack</CardTitle>
               <CardDescription class="text-xs">
                 Pile de mémoire hiérarchique
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent class="h-[320px] overflow-y-auto">
               <div class="space-y-2">
                 <!-- Haute priorité -->
-                <div class="p-2 bg-[#93c5fd] dark:bg-blue-900/20 rounded-lg">
+                <div class="p-2 bg-[#EBF5FF] dark:bg-blue-900/20 rounded-lg">
                   <div class="flex items-center mb-2">
                     <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
                     <span class="text-xs font-medium text-blue-700 dark:text-blue-300">Haute priorité</span>
                   </div>
                   <div v-for="(item, idx) in currentState.memoryStack.high" 
                        :key="idx" 
-                       class="p-2 bg-white/80 dark:bg-gray-800/80 rounded-md text-sm mb-1">
+                       class="p-2 bg-white/90 dark:bg-slate-800/90 rounded-md text-sm mb-1">
                     {{ item }}
                   </div>
                 </div>
 
                 <!-- Moyenne priorité -->
-                <div class="p-2 bg-[#C8E6C9] dark:bg-green-900/20 rounded-lg">
+                <div class="p-2 bg-[#F0FDF4] dark:bg-green-900/20 rounded-lg">
                   <div class="flex items-center mb-2">
                     <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
                     <span class="text-xs font-medium text-green-700 dark:text-green-300">Moyenne priorité</span>
                   </div>
                   <div v-for="(item, idx) in currentState.memoryStack.medium" 
                        :key="idx" 
-                       class="p-2 bg-white/80 dark:bg-gray-800/80 rounded-md text-sm mb-1">
+                       class="p-2 bg-white/90 dark:bg-slate-800/90 rounded-md text-sm mb-1">
                     {{ item }}
                   </div>
                 </div>
 
                 <!-- Basse priorité -->
-                <div class="p-2 bg-[#FFE0B2] dark:bg-orange-900/20 rounded-lg">
+                <div class="p-2 bg-[#FFF7ED] dark:bg-orange-900/20 rounded-lg">
                   <div class="flex items-center mb-2">
                     <div class="w-2 h-2 rounded-full bg-orange-500 mr-2"></div>
                     <span class="text-xs font-medium text-orange-700 dark:text-orange-300">Basse priorité</span>
                   </div>
                   <div v-for="(item, idx) in currentState.memoryStack.low" 
                        :key="idx" 
-                       class="p-2 bg-white/80 dark:bg-gray-800/80 rounded-md text-sm mb-1">
+                       class="p-2 bg-white/90 dark:bg-slate-800/90 rounded-md text-sm mb-1">
                     {{ item }}
                   </div>
                 </div>
@@ -203,6 +261,11 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import TimelinePoint from '@/components/TimelinePoint.vue'
 import { conversationStates } from '@/data/conversation-states'
+import { 
+  LightBulbIcon, 
+  DocumentTextIcon,
+  QueueListIcon
+} from '@heroicons/vue/24/outline'
 
 const currentStep = ref(0)
 const currentPair = ref(0)
@@ -217,7 +280,7 @@ const timelinePoints = computed(() => {
 })
 
 const currentState = computed(() => {
-  // Si nous sommes à la première étape, retourner un état initial vide
+  // Si nous sommes �� la première étape, retourner un état initial vide
   if (currentStep.value === 0) {
     return {
       contextWindow: {
@@ -440,5 +503,59 @@ const isActiveMessage = (index: number) => {
 .message-content {
   white-space: pre-line;
   word-wrap: break-word;
+}
+
+.conversation-container {
+  scroll-behavior: smooth;
+  scroll-padding: 2rem;
+  overflow-y: auto;
+  height: 100%;
+  /* Empêcher le débordement horizontal */
+  overflow-x: hidden;
+  /* Masquer la scrollbar sur certains navigateurs */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Styliser la scrollbar pour Webkit */
+.conversation-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.conversation-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.conversation-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+/* Style pour les conteneurs à défilement */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.card {
+  @apply transition-all duration-300;
+}
+
+.card:hover {
+  @apply shadow-md;
+  transform: translateY(-1px);
 }
 </style> 

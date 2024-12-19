@@ -1,13 +1,17 @@
 <template>
   <div class="space-y-8">
     <!-- Introduction -->
-    <div class="bg-muted/50 rounded-lg p-4">
-      <p class="text-base leading-relaxed">
-        Après la tokenisation, chaque token est transformé en vecteur : une série de nombres qui 
-        représente sa position dans un espace multidimensionnel. Cette transformation permet au 
-        modèle de capturer les nuances de sens et les relations entre les tokens.
-      </p>
-    </div>
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <p class="text-base leading-relaxed">
+          Après la tokenisation, chaque token est transformé en 
+          <span class="font-medium">vecteur</span> : une série de nombres qui représente sa 
+          <span class="italic">position dans un espace multidimensionnel</span>. Cette transformation 
+          permet au modèle de capturer les <span class="font-medium text-primary">nuances de sens</span> 
+          et les <span class="font-medium">relations</span> entre les tokens.
+        </p>
+      </CardContent>
+    </Card>
 
     <!-- Sélection du scénario -->
     <div class="flex gap-4 mb-4">
@@ -23,124 +27,135 @@
     </div>
 
     <!-- Explications -->
-    <div class="bg-muted/30 rounded-lg p-4">
-      <div class="grid md:grid-cols-2 gap-6 text-sm text-muted-foreground">
-        <div>
-          <h4 class="font-medium text-foreground mb-2">Coordonnées Vectorielles</h4>
-          <p>Les coordonnées numériques représentent la position de chaque token dans l'espace vectoriel.
-             Chaque vecteur contient 3 dimensions pour cet exemple pédagogique.</p>
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <div class="grid md:grid-cols-2 gap-6 text-sm text-muted-foreground">
+          <div>
+            <h4 class="font-medium text-foreground mb-2">Coordonnées Vectorielles</h4>
+            <p>Les coordonnées numériques représentent la position de chaque token dans l'espace vectoriel.
+               Chaque vecteur contient 3 dimensions pour cet exemple pédagogique.</p>
+          </div>
+          <div>
+            <h4 class="font-medium text-foreground mb-2">Visualisation Spatiale</h4>
+            <p>La représentation en 3D montre comment les tokens se positionnent dans l'espace.
+               Plus deux tokens sont proches, plus leur sens est relié.</p>
+          </div>
         </div>
-        <div>
-          <h4 class="font-medium text-foreground mb-2">Visualisation Spatiale</h4>
-          <p>La représentation en 3D montre comment les tokens se positionnent dans l'espace.
-             Plus deux tokens sont proches, plus leur sens est relié.</p>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
 
     <div class="grid md:grid-cols-2 gap-8">
       <!-- Représentation vectorielle -->
       <div class="space-y-4">
         <h3 class="text-lg font-medium">Représentation vectorielle</h3>
-        <div class="bg-muted/50 rounded-lg p-4">
-          <div class="space-y-2">
-            <div 
-              v-for="vector in vectors" 
-              :key="vector.token" 
-              class="flex items-center justify-between p-2 bg-blue-100 
-                     dark:bg-blue-900/20 rounded-md hover:shadow-md transition-shadow"
-              @click="selectVector(vector)"
-              :class="{ 'ring-2 ring-primary': selectedVector?.token === vector.token }"
-            >
-              <span class="font-medium">{{ vector.token }}</span>
-              <span class="font-mono text-sm text-muted-foreground">
-                [{{ vector.values.map(v => v.toFixed(2)).join(', ') }}]
-              </span>
+        <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+          <CardContent class="p-6">
+            <div class="space-y-2">
+              <div 
+                v-for="vector in vectors" 
+                :key="vector.token" 
+                class="flex items-center justify-between p-2 bg-blue-100 
+                       dark:bg-blue-900/20 rounded-md hover:shadow-md transition-shadow"
+                @click="selectVector(vector)"
+                :class="{ 'ring-2 ring-primary': selectedVector?.token === vector.token }"
+              >
+                <span class="font-medium">{{ vector.token }}</span>
+                <span class="font-mono text-sm text-muted-foreground">
+                  [{{ vector.values.map(v => v.toFixed(2)).join(', ') }}]
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       <!-- Visualisation 3D -->
       <div class="space-y-4">
         <h3 class="text-lg font-medium">Visualisation 3D</h3>
-        <div class="bg-muted/50 rounded-lg p-4">
-          <div 
-            ref="container3D" 
-            class="h-[300px] w-full relative rounded-md overflow-hidden"
-          >
-            <!-- Légende -->
-            <div class="absolute top-2 right-2 bg-background/80 p-2 rounded text-xs space-y-1">
-              <div class="flex items-center gap-2">
-                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span>Représentation vectorielle</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>Token sélectionné</span>
+        <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+          <CardContent class="p-6">
+            <div 
+              ref="container3D" 
+              class="h-[300px] w-full relative rounded-md overflow-hidden"
+            >
+              <!-- Légende -->
+              <div class="absolute top-2 right-2 bg-background/80 p-2 rounded text-xs space-y-1">
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span>Représentation vectorielle</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span>Token sélectionné</span>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <!-- Contrôles -->
-          <div class="mt-4 flex gap-4 justify-center">
-            <Button 
-              variant="outline" 
-              size="sm"
-              @click="resetCamera"
-            >
-              Réinitialiser la vue
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              @click="toggleAnimation"
-            >
-              {{ isAnimating ? 'Arrêter' : 'Animer' }}
-            </Button>
-          </div>
-        </div>
+            
+            <!-- Contrôles -->
+            <div class="mt-4 flex gap-4 justify-center">
+              <Button 
+                variant="outline" 
+                size="sm"
+                @click="resetCamera"
+              >
+                Réinitialiser la vue
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                @click="toggleAnimation"
+              >
+                {{ isAnimating ? 'Arrêter' : 'Animer' }}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
 
     <!-- Points clés -->
-    <div class="bg-muted/30 rounded-lg p-4">
-      <h4 class="font-medium mb-3">Points essentiels :</h4>
-      <ul class="grid md:grid-cols-2 gap-4 text-sm">
-        <li class="flex items-start gap-2">
-          <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5"></div>
-          <span>Chaque token (pas chaque mot) a sa propre représentation vectorielle</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5"></div>
-          <span>La position dans l'espace reflète le sens et l'usage du token</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5"></div>
-          <span>Les tokens de sens proche se retrouvent proches dans l'espace</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5"></div>
-          <span>Cette représentation permet au modèle de comprendre les nuances et les relations entre tokens</span>
-        </li>
-      </ul>
-    </div>
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <h4 class="font-medium mb-3">Points essentiels :</h4>
+        <ul class="grid md:grid-cols-2 gap-4 text-sm">
+          <li class="flex items-start gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5"></div>
+            <span>Chaque token (pas chaque mot) a sa propre représentation vectorielle</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5"></div>
+            <span>La position dans l'espace reflète le sens et l'usage du token</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5"></div>
+            <span>Les tokens de sens proche se retrouvent proches dans l'espace</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5"></div>
+            <span>Cette représentation permet au modèle de comprendre les nuances et les relations entre tokens</span>
+          </li>
+        </ul>
+      </CardContent>
+    </Card>
 
     <!-- Note technique -->
-    <div class="bg-primary/5 rounded-lg p-4 border border-primary/10">
-      <h4 class="font-medium text-primary mb-2">Note technique</h4>
-      <p class="text-sm leading-relaxed">
-        Dans un LLM réel, ces vecteurs ont typiquement entre 768 et 4096 dimensions, 
-        permettant de capturer des relations sémantiques beaucoup plus riches et complexes 
-        que notre visualisation 3D simplifiée.
-      </p>
-    </div>
+    <Card class="bg-slate-50 dark:bg-slate-800/50 transition-all hover:shadow-md">
+      <CardContent class="p-6">
+        <h4 class="font-medium text-primary mb-2">Note technique</h4>
+        <p class="text-sm leading-relaxed">
+          Dans un LLM réel, ces vecteurs ont typiquement entre 768 et 4096 dimensions, 
+          permettant de capturer des relations sémantiques beaucoup plus riches et complexes 
+          que notre visualisation 3D simplifiée.
+        </p>
+      </CardContent>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
