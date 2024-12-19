@@ -7,7 +7,8 @@
             <div>
               <CardTitle>L'Entonnoir de Décision LLM</CardTitle>
               <CardDescription>
-                Visualisez comment les paramètres influencent la génération de texte
+                L'entonnoir de décision illustre comment un LLM filtre et sélectionne ses réponses.
+                Découvrez l'impact de chaque paramètre sur la génération de texte.
               </CardDescription>
             </div>
             <Button variant="outline" @click="showInfo = true">
@@ -39,114 +40,126 @@
                   >
                     Scénario Voyage
                   </Button>
+                  <Button 
+                    variant="outline"
+                    :class="{ 'bg-primary text-primary-foreground': selectedScenario === 'recipe' }"
+                    @click="selectScenario('recipe')"
+                  >
+                    Génération de Recette
+                  </Button>
                 </div>
               </CardContent>
             </div>
 
-            <!-- Contrôles -->
+            <!-- Remplacer la section des contrôles -->
             <div class="space-y-2">
               <h3 class="text-sm font-medium mb-2">Paramètres</h3>
               <CardContent class="border rounded-lg p-6 shadow-sm">
-                <div class="space-y-8">
-                  <div class="space-y-2">
-                    <Label>Température: {{ temperature.toFixed(2) }}</Label>
-                    <Slider
-                      :model-value="[temperature]"
-                      @update:model-value="value => temperature = value[0]"
-                      :min="0.1"
-                      :max="2.0"
-                      :step="0.1"
-                      class="w-full"
-                    />
-                    <p class="text-xs text-muted-foreground">
-                      Contrôle la créativité du modèle
-                    </p>
-                  </div>
-
-                  <div class="space-y-2">
-                    <Label>Top K: {{ topK }}</Label>
-                    <Slider
-                      :model-value="[topK]"
-                      @update:model-value="value => topK = value[0]"
-                      :min="1"
-                      :max="10"
-                      :step="1"
-                      class="w-full"
-                    />
-                    <p class="text-xs text-muted-foreground">
-                      Limite le nombre de tokens
-                    </p>
-                  </div>
-
-                  <div class="space-y-2">
-                    <Label>Top P: {{ topP.toFixed(2) }}</Label>
-                    <Slider
-                      :model-value="[topP]"
-                      @update:model-value="value => topP = value[0]"
-                      :min="0.1"
-                      :max="1.0"
-                      :step="0.05"
-                      class="w-full"
-                    />
-                    <p class="text-xs text-muted-foreground">
-                      Seuil de probabilité cumulée
-                    </p>
-                  </div>
-                </div>
+                <ParameterControls
+                  v-model:temperature="temperature"
+                  v-model:topK="topK"
+                  v-model:topP="topP"
+                />
               </CardContent>
             </div>
 
             <!-- Distribution initiale -->
             <div class="space-y-2">
-              <h3 class="text-sm font-medium mb-2">Données</h3>
+              <h3 class="text-sm font-medium mb-2">Distribution initiale des mots</h3>
               <CardContent class="border rounded-lg p-4 shadow-sm">
-                <Collapsible>
-                  <CollapsibleTrigger class="flex items-center gap-2 text-sm hover:text-primary w-full">
-                    <ChevronRightIcon
-                      class="h-4 w-4 transition-transform duration-200"
-                      :class="{ 'rotate-90': isOpen }"
-                    />
-                    <span>Distribution initiale</span>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <ScrollArea class="h-[200px] mt-4">
-                      <div class="space-y-2 pr-4">
-                        <div v-for="token in baseTokens" :key="token.token" 
-                             class="text-sm flex justify-between items-center px-3 py-2 hover:bg-muted/50 rounded-md">
-                          <span>{{ token.token }}</span>
-                          <span>{{ (token.prob * 100).toFixed(1) }}%</span>
+                <ScrollArea class="h-[300px]">
+                  <div class="space-y-2 pr-4">
+                    <div v-for="token in baseTokens" :key="token.token" 
+                         class="text-sm px-3 py-2 hover:bg-muted/50 rounded-md">
+                      <div class="flex justify-between items-center mb-1">
+                        <span class="font-medium">{{ token.token }}</span>
+                        <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                      </div>
+                      <!-- Barre de progression -->
+                      <div class="w-full bg-muted/30 rounded-full h-1.5">
+                        <div class="bg-primary h-full rounded-full transition-all duration-300"
+                             :style="{ width: `${token.prob * 100}%` }">
                         </div>
                       </div>
-                    </ScrollArea>
-                  </CollapsibleContent>
-                </Collapsible>
+                      <!-- Description en dessous -->
+                      <p class="text-xs text-muted-foreground mt-1">
+                        {{ token.description }}
+                      </p>
+                    </div>
+                  </div>
+                </ScrollArea>
               </CardContent>
             </div>
           </div>
 
           <!-- Colonne centrale : Visualisation -->
           <div class="md:col-span-6">
-            <!-- Phrase d'exemple -->
+            <!-- Phrase d'exemple avec résultat -->
             <CardContent class="pb-6">
-              <div class="bg-muted p-6 rounded-lg shadow-sm">
-                <p class="text-lg font-medium">{{ currentScenario.prompt }}<span class="text-primary font-bold"> ...</span></p>
-                <p class="text-sm text-muted-foreground mt-3">{{ currentScenario.description }}</p>
+              <div class="w-full bg-muted p-6 rounded-lg shadow-sm">
+                <div class="flex flex-col gap-4">
+                  <div>
+                    <p class="text-lg font-medium">
+                      {{ currentScenario.prompt }}
+                      <span v-if="selectedWord" class="text-primary font-bold">
+                        {{ selectedWord.word }}
+                      </span>
+                      <span v-else class="text-primary font-bold"> ...</span>
+                    </p>
+                    <p class="text-sm text-muted-foreground mt-2">
+                      {{ currentScenario.description }}
+                    </p>
+                  </div>
+                  
+                  <div v-if="selectedWord" class="flex items-center gap-2 text-sm">
+                    <div class="flex-1">
+                      <div class="h-1.5 bg-muted/30 rounded-full">
+                        <div class="h-full bg-primary rounded-full transition-all duration-300"
+                             :style="{ width: `${selectedWord.probability * 100}%` }">
+                        </div>
+                      </div>
+                    </div>
+                    <span class="text-muted-foreground">
+                      {{ (selectedWord.probability * 100).toFixed(1) }}% de confiance
+                    </span>
+                  </div>
+                </div>
               </div>
+            </CardContent>
+
+            <!-- Analyse préliminaire repliable -->
+            <CardContent class="pb-6">
+              <Collapsible>
+                <CollapsibleTrigger class="flex items-center gap-2 text-sm hover:text-primary w-full mb-2">
+                  <ChevronRightIcon
+                    class="h-4 w-4 transition-transform duration-200"
+                    :class="{ 'rotate-90': isAnalysisOpen }"
+                  />
+                  <span class="font-medium">Analyse Préliminaire</span>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <PreFunnelView 
+                    :input_tokens="currentScenario.input_tokens"
+                    class="w-full"
+                  />
+                </CollapsibleContent>
+              </Collapsible>
             </CardContent>
 
             <!-- Entonnoir -->
             <CardContent>
-              <div class="h-[600px] bg-card rounded-lg border shadow-sm relative">
+              <div class="w-full h-[600px] bg-card rounded-lg border shadow-sm relative">
                 <svg viewBox="0 0 400 400" class="w-full h-full">
-                  <!-- Entonnoir -->
+                  <!-- Entonnoir avec animation de pulse -->
                   <path
                     :d="getFunnelPath"
                     fill="#e2e8f0"
                     stroke="#64748b"
                     stroke-width="2"
+                    class="funnel-path"
                   />
 
-                  <!-- Points représentant les tokens par niveau -->
+                  <!-- Points représentant les tokens avec animation de chute -->
                   <template v-for="(level, levelIndex) in tokenLevels" :key="levelIndex">
                     <circle
                       v-for="(point, i) in level"
@@ -156,27 +169,59 @@
                       r="4"
                       :fill="point.color"
                       class="token-point"
+                      :style="{
+                        '--delay': `${i * 0.1}s`,
+                        '--level': levelIndex
+                      }"
                     >
                       <title>{{ point.title }}</title>
                     </circle>
                   </template>
+
+                  <!-- Ajouter des effets visuels pour les filtres -->
+                  <g class="filter-effects">
+                    <path
+                      v-for="(filter, index) in filterEffects"
+                      :key="index"
+                      :d="filter.path"
+                      :stroke="filter.color"
+                      class="filter-line"
+                      stroke-width="1"
+                      fill="none"
+                    />
+                  </g>
                 </svg>
 
-                <!-- Légende -->
+                <!-- Légende améliorée -->
                 <div class="absolute top-4 right-4 bg-background/80 p-4 rounded-lg shadow-sm">
-                  <div class="space-y-2">
-                    <p class="text-sm">
-                      <span class="inline-block w-3 h-3 rounded-full bg-[#93c5fd] mr-2"></span>
-                      Après température: {{ filteredTokens.afterTemp.length }}
-                    </p>
-                    <p class="text-sm">
-                      <span class="inline-block w-3 h-3 rounded-full bg-[#3b82f6] mr-2"></span>
-                      Après Top K: {{ filteredTokens.afterTopK.length }}
-                    </p>
-                    <p class="text-sm">
-                      <span class="inline-block w-3 h-3 rounded-full bg-[#1d4ed8] mr-2"></span>
-                      Après Top P: {{ filteredTokens.afterTopP.length }}
-                    </p>
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                      <span class="inline-block w-3 h-3 rounded-full bg-[#93c5fd]"></span>
+                      <div>
+                        <p class="text-sm font-medium">Après température</p>
+                        <p class="text-xs text-muted-foreground">
+                          {{ filteredTokens.afterTemp.length }} mots
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="inline-block w-3 h-3 rounded-full bg-[#3b82f6]"></span>
+                      <div>
+                        <p class="text-sm font-medium">Après Top K</p>
+                        <p class="text-xs text-muted-foreground">
+                          {{ filteredTokens.afterTopK.length }} mots
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="inline-block w-3 h-3 rounded-full bg-[#1d4ed8]"></span>
+                      <div>
+                        <p class="text-sm font-medium">Après Top P</p>
+                        <p class="text-xs text-muted-foreground">
+                          {{ filteredTokens.afterTopP.length }} mots
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -186,7 +231,26 @@
           <!-- Colonne de droite : Résultats -->
           <div class="md:col-span-3">
             <div class="space-y-2">
-              <h3 class="text-sm font-medium mb-2">Résultats</h3>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-medium mb-2">Résultats</h3>
+                <div class="relative inline-block group">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    class="h-5 w-5 p-0 hover:bg-transparent"
+                  >
+                    <InformationCircleIcon 
+                      class="h-4 w-4 text-muted-foreground group-hover:text-primary"
+                    />
+                    <span class="sr-only">Information sur les résultats</span>
+                  </Button>
+                  
+                  <!-- Tooltip -->
+                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-popover/90 backdrop-blur-sm text-popover-foreground text-xs rounded-lg shadow-lg w-48 invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200 z-50">
+                    Observez comment les différents paramètres influencent la distribution des probabilités et les choix finaux du modèle.
+                  </div>
+                </div>
+              </div>
               <CardContent class="h-full border rounded-lg p-6 shadow-sm">
                 <ScrollArea class="h-[700px]">
                   <div class="space-y-4 p-4">
@@ -196,11 +260,18 @@
                         <span class="w-3 h-3 rounded-full bg-[#93c5fd]"></span>
                         Après température ({{ temperature.toFixed(2) }})
                       </h3>
-                      <div class="space-y-1">
+                      <div class="space-y-2">
                         <div v-for="token in sortedTempTokens.slice(0, 6)" :key="token.token" 
-                             class="text-sm flex justify-between px-2 py-1 rounded hover:bg-muted">
-                          <span>{{ token.token }}</span>
-                          <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                             class="text-sm px-3 py-2 rounded hover:bg-muted">
+                          <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium">{{ token.token }}</span>
+                            <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                          </div>
+                          <div class="w-full bg-muted/30 rounded-full h-1.5">
+                            <div class="bg-[#93c5fd] h-full rounded-full transition-all duration-300"
+                                 :style="{ width: `${token.prob * 100}%` }">
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -211,11 +282,18 @@
                         <span class="w-3 h-3 rounded-full bg-[#3b82f6]"></span>
                         Après Top K ({{ topK }})
                       </h3>
-                      <div class="space-y-1">
+                      <div class="space-y-2">
                         <div v-for="token in sortedTopKTokens.slice(0, 6)" :key="token.token" 
-                             class="text-sm flex justify-between px-2 py-1 rounded hover:bg-muted">
-                          <span>{{ token.token }}</span>
-                          <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                             class="text-sm px-3 py-2 rounded hover:bg-muted">
+                          <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium">{{ token.token }}</span>
+                            <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                          </div>
+                          <div class="w-full bg-muted/30 rounded-full h-1.5">
+                            <div class="bg-[#3b82f6] h-full rounded-full transition-all duration-300"
+                                 :style="{ width: `${token.prob * 100}%` }">
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -226,11 +304,18 @@
                         <span class="w-3 h-3 rounded-full bg-[#1d4ed8]"></span>
                         Après Top P ({{ topP.toFixed(2) }})
                       </h3>
-                      <div class="space-y-1">
+                      <div class="space-y-2">
                         <div v-for="token in sortedTopPTokens.slice(0, 6)" :key="token.token" 
-                             class="text-sm flex justify-between px-2 py-1 rounded hover:bg-muted">
-                          <span>{{ token.token }}</span>
-                          <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                             class="text-sm px-3 py-2 rounded hover:bg-muted">
+                          <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium">{{ token.token }}</span>
+                            <span class="text-muted-foreground">{{ (token.prob * 100).toFixed(1) }}%</span>
+                          </div>
+                          <div class="w-full bg-muted/30 rounded-full h-1.5">
+                            <div class="bg-[#1d4ed8] h-full rounded-full transition-all duration-300"
+                                 :style="{ width: `${token.prob * 100}%` }">
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -308,7 +393,7 @@
 
               <h4>Top P (Nucleus Sampling)</h4>
               <ul>
-                <li>Sélection basée sur la probabilité cumul��e</li>
+                <li>Sélection basée sur la probabilité cumulée</li>
                 <li>Garde les tokens jusqu'à atteindre le seuil P</li>
                 <li>Adaptation dynamique selon le contexte</li>
               </ul>
@@ -456,7 +541,7 @@ pur-sang  : 0.08  | Cumul: 0.80
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { ChevronRightIcon } from '@heroicons/vue/24/solid'
+import { ChevronRightIcon, InformationCircleIcon } from '@heroicons/vue/24/solid'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
@@ -471,8 +556,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import PreFunnelView from '@/components/PreFunnelView.vue'
+import ParameterControls from '@/components/ParameterControls.vue'
 
 const isOpen = ref(false)
+const isAnalysisOpen = ref(false)
 
 const temperature = ref(0.7)
 const topK = ref(5)
@@ -484,11 +572,23 @@ interface Token {
   description?: string;
 }
 
+interface InputWord {
+  word: string;
+  tokens: string[];
+}
+
+interface Prediction {
+  word: string;
+  prob: number;
+  description: string;
+}
+
 interface Scenario {
   id: string;
   prompt: string;
   description: string;
-  tokens: Token[];
+  input_tokens: InputWord[];
+  predictions: Prediction[];
 }
 
 // Définition des scénarios
@@ -497,145 +597,144 @@ const scenarios: Record<string, Scenario> = {
     id: 'horse',
     prompt: 'Il court au galop, c\'est un',
     description: 'Prédiction du type d\'animal en fonction du contexte',
-    tokens: [
-      { token: "cheval", prob: 0.35, description: "Animal le plus probable dans ce contexte" },
-      { token: "étalon", prob: 0.25, description: "Spécification masculine du cheval" },
-      { token: "poney", prob: 0.12, description: "Variante plus petite" },
-      { token: "pur-sang", prob: 0.08, description: "Race spécifique" },
-      { token: "mustang", prob: 0.05, description: "Type de cheval sauvage" },
-      { token: "coursier", prob: 0.04, description: "Synonyme plus littéraire" },
-      { token: "canasson", prob: 0.03, description: "Terme familier" },
-      { token: "destrier", prob: 0.02, description: "Terme historique" },
-      { token: "palomino", prob: 0.015, description: "Couleur spécifique" },
-      { token: "yearling", prob: 0.01, description: "Jeune cheval" },
-      { token: "zèbre", prob: 0.008, description: "Autre équidé" },
-      { token: "lièvre", prob: 0.007, description: "Autre animal rapide" },
-      { token: "guépard", prob: 0.005, description: "Animal rapide mais moins probable" },
-      { token: "kangourou", prob: 0.003, description: "Animal qui bondit" },
-      { token: "centaure", prob: 0.002, description: "Créature mythologique" }
+    input_tokens: [
+      { word: "Il", tokens: ["Il"] },
+      { word: "court", tokens: ["court"] },
+      { word: "au", tokens: ["au"] },
+      { word: "galop", tokens: ["gal", "op"] },
+      { word: ",", tokens: [","] },
+      { word: "c'est", tokens: ["c'", "est"] },
+      { word: "un", tokens: ["un"] }
+    ],
+    predictions: [
+      { word: "cheval", prob: 0.35, description: "Animal le plus probable dans ce contexte" },
+      { word: "étalon", prob: 0.25, description: "Spécification masculine du cheval" },
+      { word: "poney", prob: 0.12, description: "Variante plus petite" },
+      { word: "pur-sang", prob: 0.08, description: "Race spécifique" },
+      { word: "mustang", prob: 0.05, description: "Type de cheval sauvage" },
+      { word: "coursier", prob: 0.04, description: "Synonyme plus littéraire" },
+      { word: "canasson", prob: 0.03, description: "Terme familier" },
+      { word: "destrier", prob: 0.02, description: "Terme historique" },
+      { word: "palomino", prob: 0.015, description: "Couleur spécifique" },
+      { word: "yearling", prob: 0.01, description: "Jeune cheval" },
+      { word: "zèbre", prob: 0.008, description: "Autre équidé" },
+      { word: "lièvre", prob: 0.007, description: "Autre animal rapide" },
+      { word: "guépard", prob: 0.005, description: "Animal rapide mais moins probable" },
+      { word: "kangourou", prob: 0.003, description: "Animal qui bondit" },
+      { word: "centaure", prob: 0.002, description: "Créature mythologique" }
     ]
   },
   italy: {
     id: 'italy',
     prompt: 'Pour votre séjour en Italie en juillet, nous vous recommandons de visiter',
     description: 'Recommandation de destination en fonction de la saison',
-    tokens: [
-      { token: "Rome", prob: 0.30, description: "Capitale, centre historique majeur" },
-      { token: "Florence", prob: 0.20, description: "Centre de la Renaissance" },
-      { token: "Venise", prob: 0.15, description: "Unique, très touristique en été" },
-      { token: "Cinque Terre", prob: 0.08, description: "Idéal en été, côte pittoresque" },
-      { token: "Toscane", prob: 0.06, description: "Région viticole et culturelle" },
-      { token: "Naples", prob: 0.05, description: "Gastronomie et histoire" },
-      { token: "Côte Amalfitaine", prob: 0.04, description: "Destination balnéaire prisée" },
-      { token: "Sicile", prob: 0.03, description: "Grande île, riche en histoire" },
-      { token: "Sardaigne", prob: 0.025, description: "Plages magnifiques, moins touristique" },
-      { token: "Bologne", prob: 0.02, description: "Centre gastronomique" },
-      { token: "Matera", prob: 0.015, description: "Ville troglodyte unique" },
-      { token: "Pouilles", prob: 0.01, description: "Région authentique émergente" },
-      { token: "Lac de Côme", prob: 0.008, description: "Destination luxe" },
-      { token: "Gênes", prob: 0.005, description: "Port historique" },
-      { token: "Dolomites", prob: 0.002, description: "Montagnes, moins adapté en été" }
+    input_tokens: [
+      { word: "Pour", tokens: ["Pour"] },
+      { word: "votre", tokens: ["vot", "re"] },
+      { word: "séjour", tokens: ["sé", "jour"] },
+      { word: "en", tokens: ["en"] },
+      { word: "Italie", tokens: ["Ital", "ie"] },
+      { word: "en", tokens: ["en"] },
+      { word: "juillet", tokens: ["juill", "et"] },
+      { word: ",", tokens: [","] },
+      { word: "nous", tokens: ["nous"] },
+      { word: "vous", tokens: ["vous"] },
+      { word: "recommandons", tokens: ["recomm", "and", "ons"] },
+      { word: "de", tokens: ["de"] },
+      { word: "visiter", tokens: ["visit", "er"] }
+    ],
+    predictions: [
+      { word: "Rome", prob: 0.30, description: "Capitale, centre historique majeur" },
+      { word: "Florence", prob: 0.20, description: "Centre de la Renaissance" },
+      { word: "Venise", prob: 0.15, description: "Unique, très touristique en été" },
+      { word: "Cinque Terre", prob: 0.08, description: "Idéal en été, côte pittoresque" },
+      { word: "Toscane", prob: 0.06, description: "Région viticole et culturelle" },
+      { word: "Naples", prob: 0.05, description: "Gastronomie et histoire" },
+      { word: "Côte Amalfitaine", prob: 0.04, description: "Destination balnéaire prisée" },
+      { word: "Sicile", prob: 0.03, description: "Grande île, riche en histoire" },
+      { word: "Sardaigne", prob: 0.025, description: "Plages magnifiques, moins touristique" },
+      { word: "Bologne", prob: 0.02, description: "Centre gastronomique" },
+      { word: "Matera", prob: 0.015, description: "Ville troglodyte unique" },
+      { word: "Pouilles", prob: 0.01, description: "Région authentique émergente" },
+      { word: "Lac de Côme", prob: 0.008, description: "Destination luxe" },
+      { word: "Gênes", prob: 0.005, description: "Port historique" },
+      { word: "Dolomites", prob: 0.002, description: "Montagnes, moins adapté en été" }
     ]
-  }
+  },
+  recipe: {
+    id: 'recipe',
+    prompt: 'Pour cette recette de gâteau, commencez par',
+    description: 'Génération d\'instructions culinaires',
+    input_tokens: [
+      { word: "Pour", tokens: ["Pour"] },
+      { word: "cette", tokens: ["cette"] },
+      { word: "recette", tokens: ["rec", "ette"] },
+      { word: "de", tokens: ["de"] },
+      { word: "gâteau", tokens: ["gât", "eau"] },
+      { word: ",", tokens: [","] },
+      { word: "commencez", tokens: ["commenc", "ez"] },
+      { word: "par", tokens: ["par"] }
+    ],
+    predictions: [
+      { word: "préchauffer", prob: 0.40, description: "Préparation du four" },
+      { word: "mélanger", prob: 0.25, description: "Incorporation des ingrédients" },
+      { word: "préparer", prob: 0.15, description: "Organisation initiale" },
+      { word: "battre", prob: 0.08, description: "Travail des œufs" },
+      { word: "tamiser", prob: 0.04, description: "Affinage de la farine" },
+      { word: "beurrer", prob: 0.03, description: "Préparation du moule" },
+      { word: "peser", prob: 0.02, description: "Mesure précise" },
+      { word: "sortir", prob: 0.01, description: "Mise à température" },
+      { word: "fouetter", prob: 0.008, description: "Aération de la pâte" },
+      { word: "rassembler", prob: 0.007, description: "Collecte des ingrédients" },
+      { word: "chemiser", prob: 0.005, description: "Protection du moule" },
+      { word: "chauffer", prob: 0.004, description: "Préparation thermique" },
+      { word: "vérifier", prob: 0.003, description: "Contrôle des ingrédients" },
+      { word: "couper", prob: 0.002, description: "Préparation des fruits" },
+      { word: "fondre", prob: 0.001, description: "Préparation du chocolat" }
+    ]
+  },
+
 };
 
 const selectedScenario = ref('horse')
 const currentScenario = computed(() => scenarios[selectedScenario.value])
 
-// Remplacer baseTokens par une computed property
-const baseTokens = computed(() => currentScenario.value.tokens)
+// Pour l'affichage des tokens dans PreFunnelView
+const inputTokens = computed(() => {
+  return currentScenario.value.input_tokens.flatMap(word => 
+    word.tokens.map(token => ({
+      text: token,
+      word: word.word
+    }))
+  );
+});
 
-const selectScenario = (scenario: string) => {
-  selectedScenario.value = scenario
-  // Réinitialiser les paramètres si nécessaire
-  temperature.value = 0.7
-  topK.value = 5
-  topP.value = 0.8
-}
+// Pour l'entonnoir et les filtres
+const baseTokens = computed(() => {
+  return currentScenario.value.predictions.map(pred => ({
+    token: pred.word,
+    prob: pred.prob,
+    description: pred.description
+  }));
+});
 
-// Amélioration du tooltip pour inclure la description
-const getTokenTooltip = (token: Token) => {
-  const percentage = (token.prob * 100).toFixed(1)
-  return `${token.token} (${percentage}%)${token.description ? `\n${token.description}` : ''}`
-}
+// Pour les résultats de prédiction
+const predictions = computed(() => {
+  return currentScenario.value.predictions;
+});
 
-// Fonction de normalisation
-const normalize = (tokens: Token[]): Token[] => {
-  const sum = tokens.reduce((acc, t) => acc + t.prob, 0)
-  return tokens.map(t => ({
-    ...t,
-    prob: t.prob / sum
-  }))
-}
-
-// Ajout d'un seuil de probabilité minimale pour filtrer les tokens négligeables
-const PROBABILITY_THRESHOLD = 0.01 // 1%
-
-// Calcul des tokens filtrés à chaque étape
+// Mise à jour du filtrage pour les prédictions
 const filteredTokens = computed(() => {
-  // 1. Application de la température
-  let tempAdjusted: Token[]
-  if (temperature.value <= 0.1) {
-    // Cas très conservateur (Temperature ≈ 0)
-    tempAdjusted = [
-      { ...baseTokens.value[0], prob: 0.95 },
-      { ...baseTokens.value[1], prob: 0.04 },
-      { ...baseTokens.value[2], prob: 0.01 }
-    ]
-  } else if (temperature.value >= 2.0) {
-    // Distribution plus uniforme
-    tempAdjusted = baseTokens.value.map(t => ({
-      ...t,
-      prob: Math.pow(t.prob, 1/temperature.value)
-    }))
-  } else {
-    // Cas normal (ex: temperature = 0.7)
-    tempAdjusted = baseTokens.value.map(t => ({
-      ...t,
-      prob: Math.pow(t.prob, 1/temperature.value)
-    }))
-  }
-
-  // Normalisation après température
-  tempAdjusted = normalize(tempAdjusted)
-    .filter(t => t.prob >= PROBABILITY_THRESHOLD)
-  tempAdjusted = normalize(tempAdjusted)
-
-  // 2. Application du Top K
-  const topKTokens = [...tempAdjusted]
-    .sort((a, b) => b.prob - a.prob)
-    .slice(0, topK.value)
-  const normalizedTopK = normalize(topKTokens)
-
-  // 3. Application du Top P (correction de la logique)
-  let cumSum = 0
-  const topPTokens: Token[] = []
-  
-  // Parcours des tokens dans l'ordre décroissant de probabilité
-  for (const token of normalizedTopK) {
-    topPTokens.push(token)
-    cumSum += token.prob
-    
-    // On s'arrête dès que la somme cumulée dépasse le seuil de Top P
-    if (cumSum >= topP.value) {
-      break
-    }
-  }
-
-  // Si aucun token n'a été sélectionné (cas rare), on prend au moins le plus probable
-  if (topPTokens.length === 0 && normalizedTopK.length > 0) {
-    topPTokens.push(normalizedTopK[0])
-  }
-
-  // Normalisation finale
-  const finalTokens = normalize(topPTokens)
+  const afterTemp = applyTemperature(predictions.value, temperature.value);
+  const afterTopK = applyTopK(afterTemp, topK.value);
+  const afterTopP = applyTopP(afterTopK, topP.value);
 
   return {
-    afterTemp: tempAdjusted,
-    afterTopK: normalizedTopK,
-    afterTopP: finalTokens
-  }
-})
+    afterTemp,
+    afterTopK,
+    afterTopP
+  };
+});
 
 // Calcul du chemin de l'entonnoir avec des dimensions plus larges
 const getFunnelPath = computed(() => {
@@ -712,6 +811,130 @@ const isLoading = ref(true)
 // État pour la dialog
 const showInfo = ref(false)
 
+const filterEffects = computed(() => {
+  const effects = []
+  const levels = [150, 250, 350] // Y positions des filtres
+
+  // Effet pour la température
+  effects.push({
+    path: `M 100,${levels[0]} Q 200,${levels[0] + 20} 300,${levels[0]}`,
+    color: '#93c5fd'
+  })
+
+  // Effet pour le Top K
+  effects.push({
+    path: `M 120,${levels[1]} Q 200,${levels[1] - 20} 280,${levels[1]}`,
+    color: '#3b82f6'
+  })
+
+  // Effet pour le Top P
+  effects.push({
+    path: `M 140,${levels[2]} Q 200,${levels[2] + 20} 260,${levels[2]}`,
+    color: '#1d4ed8'
+  })
+
+  return effects
+})
+
+// Ajouter ces fonctions avant les computed properties
+
+// Fonction pour appliquer la température aux probabilités
+const applyTemperature = (tokens: Prediction[], temp: number): Token[] => {
+  if (temp <= 0.1) {
+    // Cas très conservateur : on retourne uniquement le token le plus probable
+    const maxToken = [...tokens].sort((a, b) => b.prob - a.prob)[0];
+    return [{
+      token: maxToken.word,
+      prob: 1,
+      description: maxToken.description
+    }];
+  }
+
+  // Appliquer la température
+  const logits = tokens.map(t => Math.log(t.prob));
+  const scaledLogits = logits.map(l => l / temp);
+  const maxLogit = Math.max(...scaledLogits);
+  
+  // Calcul du softmax avec température
+  const expLogits = scaledLogits.map(l => Math.exp(l - maxLogit));
+  const sumExp = expLogits.reduce((a, b) => a + b, 0);
+  const newProbs = expLogits.map(exp => exp / sumExp);
+
+  // Retourner les tokens avec leurs nouvelles probabilités
+  return tokens.map((t, i) => ({
+    token: t.word,
+    prob: newProbs[i],
+    description: t.description
+  }));
+};
+
+// Fonction pour appliquer le filtrage Top-K
+const applyTopK = (tokens: Token[], k: number): Token[] => {
+  // Trier par probabilité décroissante et prendre les k premiers
+  const topK = [...tokens]
+    .sort((a, b) => b.prob - a.prob)
+    .slice(0, k);
+  
+  // Renormaliser les probabilités
+  const sum = topK.reduce((acc, t) => acc + t.prob, 0);
+  return topK.map(t => ({
+    ...t,
+    prob: t.prob / sum
+  }));
+};
+
+// Fonction pour appliquer le filtrage Top-P (nucleus sampling)
+const applyTopP = (tokens: Token[], p: number): Token[] => {
+  // Trier par probabilité décroissante
+  const sorted = [...tokens].sort((a, b) => b.prob - a.prob);
+  
+  // Calculer les probabilités cumulées
+  let cumSum = 0;
+  const selected: Token[] = [];
+  
+  for (const token of sorted) {
+    cumSum += token.prob;
+    selected.push(token);
+    if (cumSum >= p) break;
+  }
+  
+  // Renormaliser les probabilités
+  const sum = selected.reduce((acc, t) => acc + t.prob, 0);
+  return selected.map(t => ({
+    ...t,
+    prob: t.prob / sum
+  }));
+};
+
+// Fonction utilitaire pour le tooltip
+const getTokenTooltip = (token: Token) => {
+  const percentage = (token.prob * 100).toFixed(1);
+  return `${token.token} (${percentage}%)${token.description ? `\n${token.description}` : ''}`;
+};
+
+// Ajouter un computed pour sélectionner le mot final
+const selectedWord = computed(() => {
+  if (filteredTokens.value.afterTopP.length === 0) return null;
+  
+  // Prendre le mot le plus probable après tous les filtres
+  const finalWord = sortedTopPTokens.value[0];
+  return {
+    word: finalWord.token,
+    probability: finalWord.prob
+  };
+});
+
+// Après la définition des scénarios et avant les computed properties
+const selectScenario = (scenario: string) => {
+  if (scenarios[scenario]) {
+    selectedScenario.value = scenario;
+    // Réinitialiser les paramètres à leurs valeurs par défaut
+    temperature.value = 0.7;
+    topK.value = 5;
+    topP.value = 0.8;
+  }
+};
+
 onMounted(() => {
   isLoading.value = false
 })
@@ -723,19 +946,61 @@ onUnmounted(() => {
 
 <style scoped>
 .token-point {
-  animation: gentle-pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  transition: all 0.5s ease-in-out;
+  animation: 
+    gentle-pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite,
+    fall-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: var(--delay);
 }
 
-@keyframes gentle-pulse {
-  0%, 100% {
+@keyframes fall-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
-  50% {
-    opacity: 0.8;
-    transform: scale(0.95);
-  }
+}
+
+/* Animation de l'entonnoir */
+.funnel-path {
+  animation: funnel-pulse 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes funnel-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+}
+
+/* Effet des filtres */
+.filter-line {
+  animation: filter-wave 2s ease-in-out infinite;
+  stroke-dasharray: 10;
+  opacity: 0.5;
+}
+
+@keyframes filter-wave {
+  0% { stroke-dashoffset: 20; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* Transition pour les changements de paramètres */
+.parameter-change {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Animation pour les nouveaux tokens */
+.token-enter-active,
+.token-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.token-enter-from,
+.token-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
 }
 
 /* Ajout d'animations pour les transitions */
