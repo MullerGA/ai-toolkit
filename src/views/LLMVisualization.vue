@@ -101,27 +101,17 @@
                   <div>
                     <p class="text-lg font-medium">
                       {{ currentScenario.prompt }}
-                      <span v-if="selectedWord" class="text-primary font-bold">
-                        {{ selectedWord.word }}
+                      <span class="blink-cursor mx-1">|</span>
+                      <span v-if="displayedWord" class="relative inline-flex items-center">
+                        <span class="typing-effect text-primary font-bold px-2 py-1 rounded-md bg-primary/5 border border-primary/20">
+                          <span class="selection-animation">{{ displayedWord }}</span>
+                        </span>
                       </span>
                       <span v-else class="text-primary font-bold"> ...</span>
                     </p>
-                    <p class="text-sm text-muted-foreground mt-2">
+                    <p class="text-sm text-muted-foreground mt-4">
                       {{ currentScenario.description }}
                     </p>
-                  </div>
-                  
-                  <div v-if="selectedWord" class="flex items-center gap-2 text-sm">
-                    <div class="flex-1">
-                      <div class="h-1.5 bg-muted/30 rounded-full">
-                        <div class="h-full bg-primary rounded-full transition-all duration-300"
-                             :style="{ width: `${selectedWord.probability * 100}%` }">
-                        </div>
-                      </div>
-                    </div>
-                    <span class="text-muted-foreground">
-                      {{ (selectedWord.probability * 100).toFixed(1) }}% de confiance
-                    </span>
                   </div>
                 </div>
               </div>
@@ -540,7 +530,7 @@ pur-sang  : 0.08  | Cumul: 0.80
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { ChevronRightIcon, InformationCircleIcon } from '@heroicons/vue/24/solid'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
@@ -561,6 +551,7 @@ import ParameterControls from '@/components/ParameterControls.vue'
 
 const isOpen = ref(false)
 const isAnalysisOpen = ref(false)
+const wordChangeInterval = ref<number | null>(null)
 
 const temperature = ref(0.7)
 const topK = ref(5)
@@ -912,16 +903,82 @@ const getTokenTooltip = (token: Token) => {
   return `${token.token} (${percentage}%)${token.description ? `\n${token.description}` : ''}`;
 };
 
-// Ajouter un computed pour sélectionner le mot final
-const selectedWord = computed(() => {
-  if (filteredTokens.value.afterTopP.length === 0) return null;
+// Ajouter un ref pour le mot actuellement affiché
+const displayedWord = ref<string | null>(null);
+
+// Modifier le computed selectedWord pour qu'il retourne seulement les mots possibles
+const selectedWords = computed(() => {
+  const currentTokens = filteredTokens.value.afterTopP;
+  if (currentTokens.length === 0) return [];
   
-  // Prendre le mot le plus probable après tous les filtres
-  const finalWord = sortedTopPTokens.value[0];
-  return {
-    word: finalWord.token,
-    probability: finalWord.prob
-  };
+  return currentTokens.map(token => ({
+    word: token.token,
+    probability: token.prob
+  }));
+});
+
+// Ajouter une fonction utilitaire pour la sélection pondérée
+const weightedRandomChoice = (words: { word: string, probability: number }[]) => {
+  const totalProb = words.reduce((sum, w) => sum + w.probability, 0);
+  const randomPoint = Math.random() * totalProb;
+  
+  let accumulator = 0;
+  for (const word of words) {
+    accumulator += word.probability;
+    if (randomPoint <= accumulator) {
+      return word.word;
+    }
+  }
+  
+  // Fallback au premier mot si jamais on n'a rien trouvé
+  return words[0].word;
+};
+
+// Ajouter la fonction selectRandomWord
+const selectRandomWord = () => {
+  if (selectedWords.value.length === 0) {
+    displayedWord.value = null;
+    return;
+  }
+
+  // Sélection aléatoire pondérée
+  displayedWord.value = weightedRandomChoice(selectedWords.value);
+};
+
+// Modifier le watcher pour utiliser des délais plus longs
+watch([temperature, topK, topP], () => {
+  if (wordChangeInterval.value) {
+    clearInterval(wordChangeInterval.value);
+  }
+
+  // Phase 1 : Plusieurs sélections rapides
+  const phase1 = setInterval(() => {
+    selectRandomWord();
+  }, 200); // Toutes les 200ms
+
+  // Après 1.5 secondes, passer à la phase 2
+  setTimeout(() => {
+    clearInterval(phase1);
+    
+    // Phase 2 : Sélections plus lentes
+    const phase2 = setInterval(() => {
+      selectRandomWord();
+    }, 400); // Toutes les 400ms
+    
+    // Après 1 seconde supplémentaire, faire la sélection finale
+    setTimeout(() => {
+      clearInterval(phase2);
+      selectRandomWord(); // Sélection finale
+    }, 1000);
+    
+  }, 1500);
+}, { immediate: true });
+
+// Nettoyer l'intervalle lors du démontage du composant
+onUnmounted(() => {
+  if (wordChangeInterval.value) {
+    clearInterval(wordChangeInterval.value);
+  }
 });
 
 // Après la définition des scénarios et avant les computed properties
@@ -1058,5 +1115,87 @@ onUnmounted(() => {
 
 :deep(.border) {
   @apply border-gray-100 dark:border-gray-800;
+}
+
+/* Effet de typing */
+.typing-effect {
+  position: relative;
+  display: inline-block;
+}
+
+.cursor {
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 70%;
+  background-color: currentColor;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Animation de shimmer pour la barre de progression */
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Transition fluide pour les changements de probabilité */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+.selection-animation {
+  display: inline-block;
+  animation: selection 0.3s ease-in-out;
+}
+
+@keyframes selection {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modifier l'animation du curseur pour qu'elle soit plus visible */
+.cursor {
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 70%;
+  background-color: currentColor;
+  animation: blink 0.7s step-end infinite;
+}
+
+.blink-cursor {
+  display: inline-block;
+  color: currentColor;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
 }
 </style> 
