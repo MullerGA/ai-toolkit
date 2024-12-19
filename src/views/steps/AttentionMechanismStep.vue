@@ -98,7 +98,7 @@
       <h3 class="text-lg font-medium mb-4">Analyse contextuelle</h3>
       <div v-if="selectedWordIndex !== null" class="space-y-6">
         <div>
-          <h4 class="text-sm font-medium mb-2">Mot sélectionné</h4>
+          <h4 class="text-sm font-medium mb-2">Token sélectionné</h4>
           <p class="text-lg font-medium text-primary">
             "{{ words[selectedWordIndex] }}"
           </p>
@@ -195,8 +195,13 @@ const words = computed(() => {
 // Matrice d'attention simulée - adaptée en fonction du scénario
 const attentionMatrix = computed(() => {
   const size = currentScenarioData.value.tokens.length
-  return Array(size).fill(0).map(() => 
-    Array(size).fill(0).map(() => Math.random())
+  return Array(size).fill(0).map((_, i) => 
+    Array(size).fill(0).map((_, j) => {
+      // Si j > i, cela signifie que c'est un mot futur
+      if (j > i) return 0
+      // Sinon, générer un score d'attention aléatoire
+      return Math.random()
+    })
   )
 })
 
@@ -205,10 +210,15 @@ const selectWord = (index: number) => {
 }
 
 const getAttentionScores = (wordIndex: number) => {
-  return attentionMatrix.value[wordIndex].map(score => {
-    // Normalisation plus progressive des scores
+  return attentionMatrix.value[wordIndex].map((score, index) => {
+    // Un mot ne peut avoir d'attention que sur les mots qui le précèdent et lui-même
+    if (index > wordIndex) {
+      return 0 // Pas d'attention sur les mots futurs
+    }
+    
+    // Normalisation des scores pour les mots précédents et actuels
     if (score < 0.1) return 0
-    return Math.pow(score, 1.5) // Courbe plus douce
+    return Math.pow(score, 1.5)
   })
 }
 
@@ -217,9 +227,10 @@ const getTopRelations = (wordIndex: number) => {
   return scores
     .map((score, index) => ({
       word: words.value[index],
-      score,
+      score: index > wordIndex ? 0 : score, // Pas de relation avec les mots futurs
       type: getRelationType(wordIndex, index)
     }))
+    .filter(relation => relation.score > 0) // Ne garder que les relations valides
     .sort((a, b) => b.score - a.score)
     .slice(0, 3)
 }

@@ -39,6 +39,7 @@
           :scenario="currentScenario"
           :scenarios="scenarios"
           @update:scenario="currentScenario = $event"
+          @next="handleNext"
         />
       </div>
     </Card>
@@ -83,29 +84,35 @@ import TokenizationStep from './steps/TokenizationStep.vue'
 import VectorRepresentationStep from './steps/VectorRepresentationStep.vue'
 import AttentionMechanismStep from './steps/AttentionMechanismStep.vue'
 import ResponseGenerationStep from './steps/ResponseGenerationStep.vue'
+import IntroductiveStep from './steps/IntroductiveStep.vue'
 
 const showInfo = ref(false)
 const currentStep = ref(1)
-const totalSteps = 4
+const totalSteps = 5
 
 const steps = [
   {
     id: 1,
+    title: 'Vue d\'Ensemble',
+    component: IntroductiveStep,
+  },
+  {
+    id: 2,
     title: 'Du Texte aux Tokens',
     component: TokenizationStep,
   },
   {
-    id: 2,
+    id: 3,
     title: 'La Représentation Vectorielle',
     component: VectorRepresentationStep,
   },
   {
-    id: 3,
+    id: 4,
     title: 'Les Mécanismes d\'Attention',
     component: AttentionMechanismStep,
   },
   {
-    id: 4,
+    id: 5,
     title: 'La Génération de Réponses',
     component: ResponseGenerationStep,
   },
@@ -179,7 +186,7 @@ const navigateToStep = (step: number) => {
   currentStep.value = step
 }
 
-const nextStep = () => {
+const handleNext = () => {
   if (currentStep.value < totalSteps) {
     currentStep.value++
   }
